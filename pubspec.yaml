@@ -1,0 +1,78 @@
+name: mybmr
+description: "You're Go To Budget, Meal Plan and Recipe Application"
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+
+version: 1.0.6+42
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^5.0.0
+  image_picker: ^0.8.0+3
+  cupertino_icons: ^1.0.2
+  fluttertoast: ^8.0.7
+  flutter_svg: ^0.22.0
+  path_provider: ^2.0.2
+  flutter_launcher_icons: ^0.9.1
+  font_awesome_flutter: ^9.1.0
+  fl_chart: ^0.40.5
+  numberpicker: ^2.1.1
+  intl: ^0.17.0
+  flutter_icons: ^1.1.0
+  firebase_core: ^1.10.5
+  cloud_firestore: ^3.1.9
+  firebase_storage: ^10.2.3
+  progress_indicators: ^1.0.0
+  flutter_image_compress: ^1.1.0
+  trotter: ^1.2.0
+  google_mobile_ads: ^1.0.1
+  native_ads: ^0.5.0
+  device_info: ^2.0.3
+  video_player: ^2.2.11
+  google_sign_in: ^5.2.3
+  firebase_auth: ^3.3.5
+  sign_in_with_apple: ^3.3.0
+  flutter_screenutil: ^5.1.1
+  web_scraper: ^0.1.4
+  scrollable_positioned_list: ^0.2.3
+  pull_to_refresh: ^2.0.0
+  package_info_plus: ^1.4.0
+  like_button: ^2.0.4
+  auto_size_text: ^3.0.0
+  multi_select_flutter: ^4.1.2
+  animated_splash_screen: ^1.2.0
+  page_transition: ^2.0.5
+  google_fonts: ^2.3.1
+  image_crop: ^0.4.0
+
+
+
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/BMRLogo.png"
+  remove_alpha_ios: true
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/videos/
+  fonts:
+    - family: MyFlutterApp
+      fonts:
+        - asset: assets/fonts/MyFlutterApp.ttf
+
+
