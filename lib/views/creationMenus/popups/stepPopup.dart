@@ -141,6 +141,18 @@ class _StepPopupState extends State<StepPopup> {
                                 Expanded(
                                     child: Container(
                                         child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context, {"step": ""});
+                                          },
+                                          child: Container(
+                                            height: 53.h,
+                                            alignment: AlignmentDirectional.center,
+                                            child: Text("Cancel",style: TextStyle(fontSize: 26.5.h)),
+                                          ),
+                                        ))),
+                                Expanded(
+                                    child: Container(
+                                        child: GestureDetector(
                                   onTap: () {
                                     String step = _controller.value.text;
                                     step = step.trim();
@@ -160,18 +172,7 @@ class _StepPopupState extends State<StepPopup> {
                                     child: Text("Confirm",style: TextStyle(fontSize: 26.5.h),),
                                   ),
                                 ))),
-                                Expanded(
-                                    child: Container(
-                                        child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context, {"step": ""});
-                                  },
-                                  child: Container(
-                                    height: 53.h,
-                                    alignment: AlignmentDirectional.center,
-                                    child: Text("Cancel",style: TextStyle(fontSize: 26.5.h)),
-                                  ),
-                                ))),
+
                               ],
                             ),
                           )

@@ -138,6 +138,17 @@ class _RecipeImporterState extends State<RecipeImporter> {
                                 children: [
                                   GestureDetector(
                                       onTap: () async {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Container(
+                                        width:  344.5.h /2,
+                                        padding: EdgeInsets.symmetric(vertical: 9),
+
+                                        alignment: AlignmentDirectional.center,
+                                        child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 21.h),),
+                                      )),
+                                  GestureDetector(
+                                      onTap: () async {
                                         if (_controller.value.text.length > 0) {
                                           String inputUrl =
                                               _controller.value.text;
@@ -154,17 +165,7 @@ class _RecipeImporterState extends State<RecipeImporter> {
                                         alignment: AlignmentDirectional.center,
                                         child: Text("Search",style: TextStyle(color: Colors.white,fontSize: 21.h),),
                                       )),
-                                  GestureDetector(
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Container(
-                                        width:  344.5.h /2,
-                                        padding: EdgeInsets.symmetric(vertical: 9),
 
-                                        alignment: AlignmentDirectional.center,
-                                        child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 21.h),),
-                                      )),
 
                                 ],
                               ),

@@ -64,7 +64,7 @@ Map<String,String> en_messages = {
   "my_lists" : "My Lists",
   "shopping_list_label":"🛒 Shopping Lists",
   "notes_label" : "📝 Notes",
-  "no_recipes_found" : "----\n😢 No recipes returned for search criteria! Try expanding criteria or if you have recipes for this type, head on over to recipe builder and share them today. 😊\n----",
+  "no_recipes_found" : "----\n😢 No recipes returned for search criteria! Try expanding your search criteria or if you have recipes for this type, head on over to recipe builder and share them today. 😊\n----",
   "calories_label2" : "Cal",
   "sign_in_required" : "Must be signed in to use this feature!",
   "login_with" : "-- Sign In With -- ",

@@ -123,17 +123,19 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
           body: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(gradient: color_palette["gradient"]),
+            decoration: BoxDecoration(
+                gradient: color_palette["gradient"]
+
+            ),
             child: Column(
               children: [
                 HeaderBar(
-                  popWidget: (widget.recipe != null)
-                      ? Icon(
+                  popWidget:
+                       Icon(
                           Icons.arrow_back,
                           color: color_palette["white"],
                           size: 31.8.h,
-                        )
-                      : null,
+            ),
                   onPopCallback: () {
                     clearRecipe();
                   },
@@ -243,7 +245,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                           textScaleFactor: 1.0,
                                           style: TextStyle(
                                               color: color_palette["white"],
-                                              fontSize: 23.85.h,
+                                              fontSize: max(23.85.h, 18),
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Spacer(),
@@ -264,6 +266,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                             child: Text(
                                               en_messages["import_label"],
                                               textScaleFactor: 1.0,
+
                                             ),
                                             style: ElevatedButton.styleFrom(
                                                 primary: color_palette[
@@ -385,7 +388,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           color: color_palette["white"],
-                                          fontSize: 23.85.h,
+                                          fontSize: max(23.85.h, 18),
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Container(
@@ -465,7 +468,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                             child: Icon(Icons.edit,
                                                 size: max(23.85.h, 18),
                                                 color: color_palette[
-                                                    "text_color_dark"]),
+                                                    "white"]),
                                           )
                                         ],
                                       ),
@@ -530,7 +533,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           color: color_palette["white"],
-                                          fontSize: 23.85.h,
+                                          fontSize: max(23.85.h, 18),
                                           fontWeight: FontWeight.bold),
                                     ),
                                     IllusionTextField(
@@ -563,7 +566,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           color: color_palette["white"],
-                                          fontSize: 23.85.h,
+                                          fontSize: max(23.85.h, 18),
                                           fontWeight: FontWeight.bold),
                                     ),
                                     IllusionTextField(
@@ -594,7 +597,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           color: color_palette["white"],
-                                          fontSize: 23.85.h,
+                                          fontSize: max(23.85.h, 18),
                                           fontWeight: FontWeight.bold),
                                     ),
                                     IllusionTextField(
@@ -650,7 +653,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           color: color_palette["white"],
-                                          fontSize: 23.85.h,
+                                          fontSize: max(23.85.h, 18),
                                           fontWeight: FontWeight.bold),
                                     ),
                                     IllusionTextField(
@@ -706,7 +709,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                       textScaleFactor: 1.0,
                                       style: TextStyle(
                                           color: color_palette["white"],
-                                          fontSize: 23.85.h,
+                                          fontSize: max(23.85.h, 18),
                                           fontWeight: FontWeight.bold),
                                     ),
                                     if (steps.length > 0)
@@ -793,7 +796,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                           en_messages["add_step_label"],
                                           textScaleFactor: 1.0,
                                           style: TextStyle(
-                                              color: color_palette["white"],fontSize: 20.h),
+                                              color: color_palette["white"],fontSize: 23.85.h),
                                         ),
                                       ),
                                     ),

@@ -117,6 +117,20 @@ class _NutritionPopupState extends State<NutritionPopup> {
                                       children: [
                                         GestureDetector(
                                             onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Container(
+                                              alignment:
+                                              AlignmentDirectional.center,
+                                              width: 318.h / 2,
+                                              child: Text(
+                                                "Cancel",
+                                                style:
+                                                TextStyle(fontSize: 20.h),
+                                              ),
+                                            )),
+                                        GestureDetector(
+                                            onTap: () {
                                               String fieldVal =
                                                   _controller.value.text;
                                               fieldVal = fieldVal.replaceAll(
@@ -139,20 +153,7 @@ class _NutritionPopupState extends State<NutritionPopup> {
                                                     TextStyle(fontSize: 20.h),
                                               ),
                                             )),
-                                        GestureDetector(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Container(
-                                              alignment:
-                                                  AlignmentDirectional.center,
-                                              width: 318.h / 2,
-                                              child: Text(
-                                                "Cancel",
-                                                style:
-                                                    TextStyle(fontSize: 20.h),
-                                              ),
-                                            )),
+
                                       ],
                                     ),
                                   )

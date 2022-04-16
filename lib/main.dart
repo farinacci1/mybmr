@@ -62,12 +62,15 @@ class MyApp extends StatelessWidget {
               scaffoldBackgroundColor: Colors.black38,
               fontFamily: "Arabato"),
           home: AnimatedSplashScreen.withScreenFunction(
-            splash: "assets/images/MyBMRLogo.png",
+            splash: "assets/images/MyBMR.png",
             splashIconSize: 230,
             backgroundColor: Colors.black38,
             screenFunction: () async {
-              await SystemChrome.setEnabledSystemUIMode(
-                  SystemUiMode.immersiveSticky);
+              SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                  statusBarColor: Colors.black38,
+                  systemNavigationBarColor: Colors.black38,
+                  systemNavigationBarDividerColor: Colors.black38
+              ));
               await SystemChrome.setPreferredOrientations([
                 DeviceOrientation.portraitUp,
                 DeviceOrientation.portraitDown,
@@ -86,7 +89,7 @@ class MyApp extends StatelessWidget {
                       Container(
                         height: 256,
                         margin: EdgeInsets.only(bottom: 10),
-                        child: Image.asset("assets/images/MyBMRLogo.png",fit: BoxFit.fitHeight,),
+                        child: Image.asset("assets/images/MyBMR.png",fit: BoxFit.fitHeight,),
                       ),
                       Text(
                         "A new version of the app is available. To proceed please update to latest app version.",
@@ -101,8 +104,8 @@ class MyApp extends StatelessWidget {
                   ),
                 );
             },
-            pageTransitionType: PageTransitionType.fade,
-            splashTransition: SplashTransition.rotationTransition,
+            pageTransitionType: PageTransitionType.bottomToTop,
+            splashTransition: SplashTransition.slideTransition,
           ),
         ));
   }

@@ -31,18 +31,19 @@ class ActionDialogue {
               content: Text(message, maxLines: 3),
               actions: <Widget>[
                 ElevatedButton(
-                    onPressed: () {
-                      if (approveAction != null) approveAction();
-                      Navigator.of(context).pop(true);
-                    },
-                    child: Text(approveLabel)),
-                ElevatedButton(
                   onPressed: () {
                     if (declineAction != null) declineAction();
                     Navigator.of(context).pop(false);
                   },
                   child: Text(declineLabel),
                 ),
+                ElevatedButton(
+                    onPressed: () {
+                      if (approveAction != null) approveAction();
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text(approveLabel)),
+
               ]);
         });
   }

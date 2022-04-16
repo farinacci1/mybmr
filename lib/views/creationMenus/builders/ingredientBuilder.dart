@@ -191,7 +191,7 @@ class _IngredientBuilderState extends State<IngredientBuilder> {
                                   fillColor: Colors.black54,
                                   hintText: "Ingredient name",
                                   hintStyle: TextStyle(
-                                    color: color_palette["white"],
+                                    color: color_palette["offWhite"],
                                   ),
                                   suffixIcon: _controller.value.text.length > 0 && widget.shouldBuild == true? IconButton(
                                     onPressed: (){
@@ -478,7 +478,7 @@ class _IngredientBuilderState extends State<IngredientBuilder> {
                   child: Icon(
                     Icons.edit,
                     size:  23.85.h,
-                    color: color_palette["text_color_dark"],
+                    color: color_palette["white"],
                   ),
                 )
             ],
@@ -552,7 +552,7 @@ class _IngredientBuilderState extends State<IngredientBuilder> {
                       child: Icon(
                         Icons.edit,
                         size: 23.85.h,
-                        color: color_palette["text_color_dark"],
+                        color: color_palette["white"],
                       ),
                     )
                   : Container()
@@ -628,7 +628,7 @@ class _IngredientBuilderState extends State<IngredientBuilder> {
                       child: Icon(
                         Icons.edit,
                         size: 23.85.h,
-                        color: color_palette["text_color_dark"],
+                        color: color_palette["white"],
                       ),
                     )
                   : Container()

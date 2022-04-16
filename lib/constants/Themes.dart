@@ -13,10 +13,17 @@ Map<String, dynamic> color_palette = {
   "semi_transparent": Color(0x33000000),
   "alternative": Color(0xFF353935),
   "gradient": LinearGradient(
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-    colors: [Color(0xFF434343), Color(0xFFe48400), Color(0xFFe48400)],
-  ),
+begin: Alignment.topRight,
+end: Alignment.bottomCenter,
+colors: <Color>[
+Color(0xffd2ccc4),
+Color(0xff04619f),
+Color(0xff380036),
+Color(0xff380036),
+Color(0xff380036),
+Color(0xff380036),
+],
+),
   "gradient_inverse": LinearGradient(
     begin: Alignment.bottomCenter,
     end: Alignment.topRight,

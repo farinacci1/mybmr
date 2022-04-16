@@ -1,7 +1,8 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:mybmr/notifiers/FavoritesNotifier.dart';
 import 'package:mybmr/notifiers/MealPlanNotifier.dart';
 import 'package:mybmr/notifiers/RecipeNotifier.dart';
@@ -15,10 +16,12 @@ import 'package:mybmr/views/MealPlannerDisplay.dart';
 import 'package:mybmr/views/RecipePageView.dart';
 import 'package:mybmr/views/UserLists.dart';
 import 'package:mybmr/views/creationMenus/builders/RecipeBuilder.dart';
+import 'package:mybmr/widgets/RecipeChoice.dart';
 
 import 'package:provider/provider.dart';
 
 import '../constants/Themes.dart';
+import '../widgets/Flashy_tab_bar.dart';
 import 'UserAccount.dart';
 
 class Home extends StatefulWidget {
@@ -26,94 +29,49 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
-  int activeView = 1;
-  Widget actionButton(
-      {Function callback,
-      IconData iconData,
-      double size,
-      Color color,
-        String msg ='',
-      Color bgColor = Colors.black}) {
-    return GestureDetector(
-      onTap: () {
-        callback();
-        setState(() {});
-      },
-      behavior: HitTestBehavior.translucent,
-      child: Container(
-         margin: EdgeInsets.symmetric(vertical: 3),
-          padding: EdgeInsets.symmetric(horizontal: 3),
-
-          width: (MediaQuery.of(context).size.width - 50) / 5,
-          alignment: AlignmentDirectional.center,
-          child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children:[Stack(
-            children: <Widget>[
-              Positioned(
-                left: 1.0,
-                top: 2.0,
-                child: Icon(
-                  iconData,
-                  size: size,
-                  color: bgColor,
-                ),
-              ),
-              Icon(
-                iconData,
-                size: size,
-                color: color,
-              )
-            ],
-          ),
-            Container(
-              margin: EdgeInsets.only(top: 3),
-              child:
-            AutoSizeText(msg,maxLines: 1,minFontSize: 8,style: TextStyle(fontSize: 14.h,color: Color(0XFFF5F5F5),)),)
-          ])),
-    );
-  }
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  int activeView = 0;
+  bool createRecipeRequested = false;
 
   Widget getPage(BuildContext context) {
     switch (activeView) {
+      case 0:
+        return RecipePageView();
+
       case 1:
-        return
-          RecipePageView();
-
-
-      case 2:
         MealPlanNotifier mealPlanNotifier =
             Provider.of<MealPlanNotifier>(context, listen: false);
 
-        if (AppUser.instance.uuid != null &&
-            AppUser.instance.uuid != "") {
-          if(mealPlanNotifier.mealPlans.length == 0 &&
+        if (AppUser.instance.uuid != null && AppUser.instance.uuid != "") {
+          if (mealPlanNotifier.mealPlans.length == 0 &&
               mealPlanNotifier.isFetching == false)
-          mealPlanNotifier.getMealPlansFromDB();
+            mealPlanNotifier.getMealPlansFromDB();
         }
-        if(AppUser.instance.uuid == null ||
-            AppUser.instance.uuid == ""){
+        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
           CustomToast(en_messages["sign_in_required"]);
         }
         return MealPlannerDisplay();
-      case 3:
-        if(AppUser.instance.uuid == null ||
-            AppUser.instance.uuid == ""){
+      case 2:
+        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
           CustomToast(en_messages["sign_in_required"]);
         }
         return RecipeBuilder();
-      case 4:
-        if(AppUser.instance.uuid == null ||
-            AppUser.instance.uuid == ""){
+      case 3:
+        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
           CustomToast(en_messages["sign_in_required"]);
-        }else{
-          if(Provider.of<UserListNotifier>(context,listen:false).isCurrentlyFetching == false && Provider.of<UserListNotifier>(context,listen:false).listIds.length == 0)
-            Provider.of<UserListNotifier>(context,listen:false).fetchUsersListIds();
+        } else {
+          if (Provider.of<UserListNotifier>(context, listen: false)
+                      .isCurrentlyFetching ==
+                  false &&
+              Provider.of<UserListNotifier>(context, listen: false)
+                      .listIds
+                      .length ==
+                  0)
+            Provider.of<UserListNotifier>(context, listen: false)
+                .fetchUsersListIds();
         }
         return UserList();
-      case 5:
+      case 4:
         if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
           return LoginScreen();
         } else {
@@ -125,7 +83,7 @@ class _HomeState extends State<Home> {
           }
           if (!favoritesNotifier.currentlyFetchingFavorites &&
               favoritesNotifier.favoriteRecipes.length == 0) {
-            favoritesNotifier.fetchRecipes( fetchFavorites: true);
+            favoritesNotifier.fetchRecipes(fetchFavorites: true);
           }
 
           return UserAccount();
@@ -139,15 +97,18 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-
-
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: color_palette["background_color"],
+        systemNavigationBarColor: color_palette["background_color"],
+        systemNavigationBarDividerColor: color_palette["background_color"]));
     RecipeNotifier recipeNotifier =
         Provider.of<RecipeNotifier>(context, listen: false);
     if (recipeNotifier.recipes.length == 0)
       Provider.of<RecipeNotifier>(context, listen: false).fetchRecipes();
     DateTime nowDate = DateTime.now();
-    DateTime startDate = DateTime(nowDate.year,nowDate.month,nowDate.day);
-    Provider.of<MealPlanNotifier>(context, listen: false).setStartOfDay(startDate,shouldNotify: false);
+    DateTime startDate = DateTime(nowDate.year, nowDate.month, nowDate.day);
+    Provider.of<MealPlanNotifier>(context, listen: false)
+        .setStartOfDay(startDate, shouldNotify: false);
     super.initState();
   }
 
@@ -155,6 +116,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     Provider.of<UserNotifier>(context, listen: true);
     Provider.of<RecipeNotifier>(context, listen: true);
+
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -164,79 +126,149 @@ class _HomeState extends State<Home> {
         minTextAdapt: true,
         orientation: Orientation.portrait);
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: Container(
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(child: getPage(context)),
-              ),
-              Container(
-                color:color_palette["text_color_dark"],
-                height: 65.h,
-
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                width: double.infinity,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    actionButton(
-                        callback: () {
-                          activeView = 1;
-                        },
-                        size: 0.4 * 58.h,
-                        iconData: Icons.house,
-                        color: activeView == 1
-                            ? Colors.orangeAccent
-                            : Colors.white,
-                      msg: "Discover"
-                    ),
-                    actionButton(
-                        callback: () {
-                          activeView = 2;
-                        },
-                        size:0.4 * 58.h,
-                        iconData: FontAwesome5.calendar_alt,
-                        color: activeView == 2
-                            ? Colors.orangeAccent
-                            : Colors.white,
-                        msg: "Meal Plan"),
-                    actionButton(
-                        callback: () {
-                          activeView = 3;
-                        },
-                        size: 0.55 * 58.h,
-                        iconData: Icons.my_library_add,
-                        color: activeView == 3
-                            ? Colors.orangeAccent
-                            : Colors.white,
-                        msg: "Create"),
-                    actionButton(
-                        callback: () {
-                          activeView = 4;
-                        },
-                        size: 0.4 * 58.h,
-                        iconData: FontAwesome5.list_alt,
-                        color: activeView == 4
-                            ? Colors.orangeAccent
-                            : Colors.white,
-                        msg: "Lists"),
-                    actionButton(
-                        callback: () {
-                          activeView = 5;
-                        },
-                        size: 0.4 * 58.h,
-                        iconData: FontAwesome5.user,
-                        color: activeView == 5
-                            ? Colors.orangeAccent
-                            : Colors.white,
-                        msg: "Account"),
-                  ],
-                ),
-              )
-            ],
+      resizeToAvoidBottomInset: false,
+      backgroundColor: color_palette["white"],
+      bottomNavigationBar: FlashyTabBar(
+        animationCurve: Curves.linear,
+        selectedIndex: activeView,
+        iconSize: 30.h,
+        height: 80.h,
+        showElevation: true,
+        backgroundColor: color_palette["background_color"],
+        onItemSelected: (index) => setState(() {
+          if (index != 2) {
+            createRecipeRequested = false;
+            this.activeView = index;
+          } else if (this.activeView != 4 ||
+              (AppUser.instance.uuid != "" && AppUser.instance.uuid != null))
+            createRecipeRequested = true;
+        }),
+        items: [
+          FlashyTabBarItem(
+            activeColor: color_palette["white"],
+            inactiveColor: color_palette["white"],
+            icon: Icon(AntDesign.home),
+            title: Text(
+              'Discover',
+            ),
           ),
-        ));
+          FlashyTabBarItem(
+            activeColor: color_palette["white"],
+            inactiveColor: color_palette["white"],
+            icon: Icon(AntDesign.calendar),
+            title: Text('Meal Plans'),
+          ),
+          FlashyTabBarItem(
+            activeColor: color_palette["white"],
+            inactiveColor: color_palette["white"],
+            icon: Icon(AntDesign.pluscircleo),
+            title: Text('Create'),
+          ),
+          FlashyTabBarItem(
+            activeColor: color_palette["white"],
+            inactiveColor: color_palette["white"],
+            icon: Icon(MaterialIcons.filter_list),
+            title: Text('Lists'),
+          ),
+          FlashyTabBarItem(
+            activeColor: color_palette["white"],
+            inactiveColor: color_palette["white"],
+            icon: Icon(AntDesign.user),
+            title: Text('Profile'),
+          ),
+        ],
+      ),
+      body: Container(
+          child: Stack(
+        alignment: AlignmentDirectional.bottomCenter,
+        children: [
+          getPage(context),
+          RecipeChoice(
+            isHidden: !createRecipeRequested,
+            backgroundColor: color_palette["background_color"],
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width - 20,
+                margin: EdgeInsets.symmetric(horizontal: 15),
+                alignment: AlignmentDirectional.center,
+                padding: EdgeInsets.only(bottom: 8),
+
+                child: Text(
+                  "Create",
+                  style:
+                      TextStyle(color: color_palette["white"], fontSize: 32.h),
+                ),
+              ),
+              Expanded(
+                  child: Container(
+                      child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      width: double.infinity,
+                      alignment: AlignmentDirectional.center,
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      decoration: BoxDecoration(
+                          color: color_palette["alternative"],
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text("Share Post",
+                          style: TextStyle(
+                              color: color_palette["white"], fontSize: 22.h)),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  RecipeBuilder()));
+                      setState(() {
+                        createRecipeRequested = false;
+                      });
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      alignment: AlignmentDirectional.center,
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      decoration: BoxDecoration(
+                          color: color_palette["alternative"],
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text("Share Recipe",
+                          style: TextStyle(
+                              color: color_palette["white"], fontSize: 22.h)),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      width: double.infinity,
+                      alignment: AlignmentDirectional.center,
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      decoration: BoxDecoration(
+                          color: color_palette["alternative"],
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text("Share video short",
+                          style: TextStyle(
+                              color: color_palette["white"], fontSize: 22.h)),
+                    ),
+                  )
+                ],
+              ))),
+            ],
+            onClose: () {
+              setState(() {
+                createRecipeRequested = false;
+              });
+            },
+          )
+        ],
+      )),
+    );
   }
 }

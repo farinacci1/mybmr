@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mybmr/notifiers/MealPlanNotifier.dart';
 import 'package:mybmr/constants/Constants.dart';
@@ -16,8 +17,6 @@ import '../constants/Themes.dart';
 import 'creationMenus/popups/MealPlanner.dart';
 
 class MealPlannerDisplay extends StatelessWidget {
-
-
   @override
   Widget build(BuildContext context) {
     MealPlanNotifier mealPlanNotifier =
@@ -37,82 +36,100 @@ class MealPlannerDisplay extends StatelessWidget {
         context: context,
         minTextAdapt: true,
         orientation: Orientation.portrait);
-
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: color_palette["background_color"],
+        systemNavigationBarColor: color_palette["background_color"],
+        systemNavigationBarDividerColor: color_palette["background_color"]));
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(gradient: color_palette["gradient"]),
-          padding:
-              EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10),
-          child: Column(
-            children: [
-              Container(
-                child: AutoSizeText(
-                  en_messages["meal_plan_label"],
-                  maxLines: 1,
-                  style: TextStyle(
-                      color: color_palette["white"], fontSize:42.4.h),
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        color: color_palette["background_color"],
+        child: Container(
+            decoration: BoxDecoration(color: color_palette["semi_transparent"]
+                //gradient: color_palette["gradient"],
                 ),
-              ),
+            child: Column(children: [
               Container(
-                width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.only(bottom: 7),
-                alignment: AlignmentDirectional.topStart,
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                        width: 2.0, color: color_palette["white"]),
-                  ),
-                ),
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 10),
+                decoration:
+                    BoxDecoration(color: color_palette["background_color"]),
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                        width: MediaQuery.of(context).size.width,
-                        padding: EdgeInsets.only(top: 10),
-                        child: CalendarTimeline(
-                          height: 92.75.h,
-                          showYears: true,
-                          initialDate: Provider.of<MealPlanNotifier>(context,
-                                  listen: false)
-                              .startOfDay,
-                          firstDate: DateTime.now().subtract(Duration(days: 7)),
-                          lastDate: DateTime.now().add(Duration(days: 14)),
-                          onDateSelected: (date) {
-                            Provider.of<MealPlanNotifier>(context,
-                                    listen: false)
-                                .setStartOfDay(date);
-                          },
-                          leftMargin: 20,
-                          monthColor: Colors.white70,
-                          dayColor: color_palette["white"],
-                          dayNameColor: color_palette["text_color_dark"],
-                          activeDayColor: color_palette["text_color_dark"],
-                          activeBackgroundDayColor: color_palette["white"],
-                          dotsColor:color_palette["text_color_dark"],
-                          locale: 'en',
-                        )),
+                      width: MediaQuery.of(context).size.width,
+                      alignment: AlignmentDirectional.center,
+                      child: AutoSizeText(
+                        en_messages["meal_plan_label"],
+                        maxLines: 1,
+                        style: TextStyle(
+                            color: color_palette["white"], fontSize: 42.4.h),
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      padding: EdgeInsets.only(bottom: 7),
+                      alignment: AlignmentDirectional.topStart,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                              width: 2.0,
+                              color: color_palette["background_color"]),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                              width: MediaQuery.of(context).size.width,
+                              padding: EdgeInsets.only(top: 10),
+                              child: CalendarTimeline(
+                                height: 92.75.h,
+                                showYears: true,
+                                initialDate: Provider.of<MealPlanNotifier>(
+                                        context,
+                                        listen: false)
+                                    .startOfDay,
+                                firstDate:
+                                    DateTime.now().subtract(Duration(days: 7)),
+                                lastDate:
+                                    DateTime.now().add(Duration(days: 14)),
+                                onDateSelected: (date) {
+                                  Provider.of<MealPlanNotifier>(context,
+                                          listen: false)
+                                      .setStartOfDay(date);
+                                },
+                                leftMargin: 20,
+                                monthColor: Colors.white70,
+                                dayColor: color_palette["white"],
+                                dayNameColor: color_palette["text_color_dark"],
+                                activeDayColor:
+                                    color_palette["text_color_dark"],
+                                activeBackgroundDayColor:
+                                    color_palette["white"],
+                                dotsColor: color_palette["text_color_dark"],
+                                locale: 'en',
+                              )),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Expanded(
-                  child: Container(
-                      decoration: BoxDecoration(
-                        color: color_palette["tone"]
-                      ),
-                      padding: EdgeInsets.only(top: 8.25.h),
-                      child: dailyPlans.length > 0
-                          ? NotificationListener<
-                                  OverscrollIndicatorNotification>(
-                              onNotification: (overscroll) {
-                                overscroll.disallowIndicator();
-                                return;
-                              },
+              if(dailyPlans.length == 0 ) Spacer(),
+              dailyPlans.length > 0
+                  ? NotificationListener<OverscrollIndicatorNotification>(
+                      onNotification: (overscroll) {
+                        overscroll.disallowIndicator();
+                        return;
+                      },
+                      child: Expanded(
+                          child: Container(
                               child: ListView.builder(
                                   itemCount: dailyPlans.length,
                                   itemBuilder: (context, index) {
@@ -141,29 +158,25 @@ class MealPlannerDisplay extends StatelessWidget {
                                     } else {
                                       return Container();
                                     }
-                                  }))
-                          : Center(
-                              child: AutoSizeText(
-                              en_messages["no_meals_found"],
-                              maxLines: 3,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white,  fontSize: 23.h),
-                            )))),
-              totalCaloriesWidget(context)
-            ],
-          ),
-        ),
-      ]),
+                                  }))))
+                  : Center(
+                      child: AutoSizeText(
+                      en_messages["no_meals_found"],
+                      maxLines: 3,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white, fontSize: 23.h),
+                    )),
+              Spacer(),
+              totalCaloriesWidget(context),
+            ])),
+      ),
     );
   }
+
   Widget totalCaloriesWidget(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(bottom: 13.1.h),
       width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-          color: Color(0x22555555)
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -172,14 +185,13 @@ class MealPlannerDisplay extends StatelessWidget {
           AutoSizeText(
             en_messages["total_calories_label"],
             maxLines: 1,
-            style: TextStyle(color: Colors.white, fontSize: 31.h),
+            style: TextStyle(color: color_palette["white"], fontSize: 31.h),
           ),
           AutoSizeText(
             "${Provider.of<MealPlanNotifier>(context, listen: false).obtainCaloriesForDate().toStringAsFixed(1)} " +
                 en_messages["calories_label2"],
             maxLines: 1,
-            style: TextStyle(
-                color: color_palette["text_color_dark"], fontSize: 23.6.h),
+            style: TextStyle(color: color_palette["white"], fontSize: 23.6.h),
           )
         ],
       ),
@@ -253,7 +265,7 @@ class MealPlannerDisplay extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color_palette["text_color_dark"],
                   gradient: color_palette["gradient"],
-                  borderRadius: BorderRadius.circular(70.h/2),
+                  borderRadius: BorderRadius.circular(70.h / 2),
                   boxShadow: [
                     BoxShadow(
                       color: color_palette["overlay"],
@@ -272,14 +284,15 @@ class MealPlannerDisplay extends StatelessWidget {
                       Container(
                           height: 53.h,
                           width: 53.h,
-                          margin: EdgeInsets.only(left: 10,right: 5),
+                          margin: EdgeInsets.only(left: 10, right: 5),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.horizontal(
-                                left:     Radius.circular(70.h/2),
-                                right:     Radius.circular(70.h/2),),
+                                left: Radius.circular(70.h / 2),
+                                right: Radius.circular(70.h / 2),
+                              ),
                               image: DecorationImage(
                                   image:
-                                  NetworkImage((recipe.recipeImageFromDB)),
+                                      NetworkImage((recipe.recipeImageFromDB)),
                                   fit: BoxFit.cover))),
                       Expanded(
                           child: Padding(
@@ -288,7 +301,7 @@ class MealPlannerDisplay extends StatelessWidget {
                               ),
                               child: Column(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceEvenly,
+                                    MainAxisAlignment.spaceEvenly,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   AutoSizeText(
@@ -313,7 +326,6 @@ class MealPlannerDisplay extends StatelessWidget {
                       Container(
                           width: 72.875.h,
                           margin: EdgeInsets.only(right: 5),
-
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -327,8 +339,8 @@ class MealPlannerDisplay extends StatelessWidget {
                               ),
                               AutoSizeText(
                                 (recipe.nutritionalValue["totalCalories"] /
-                                    recipe.peopleServed)
-                                    .toStringAsFixed(1) +
+                                            recipe.peopleServed)
+                                        .toStringAsFixed(1) +
                                     " Cal",
                                 textAlign: TextAlign.center,
                                 minFontSize: 8,
@@ -354,11 +366,9 @@ class MealPlannerDisplay extends StatelessWidget {
                           margin: EdgeInsets.only(right: 5),
                           decoration: BoxDecoration(
                               color: Colors.transparent,
-                            borderRadius: BorderRadius.horizontal(
-                              right: Radius.circular(70.h/2),
-                            )
-                          ),
-
+                              borderRadius: BorderRadius.horizontal(
+                                right: Radius.circular(70.h / 2),
+                              )),
                           child: Icon(
                             Icons.copy,
                             color: Colors.white,

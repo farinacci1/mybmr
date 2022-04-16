@@ -154,6 +154,25 @@ class _RecipeTimeState extends State<RecipeTime> {
                           children: [
                             Expanded(
                                 child: Container(
+
+                                    child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.pop(context,
+                                              {"hasResult": false});
+                                        },
+                                        child: Container(
+                                            height: 53.h,
+                                            child: Text(
+                                              "Cancel",
+
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  fontSize: 26.5.h,
+                                                  color: color_palette[
+                                                  "text_color_alt"]),
+                                            ))))),
+                            Expanded(
+                                child: Container(
                                     child: GestureDetector(
                                         onTap: () {
                                           Navigator.pop(
@@ -174,25 +193,7 @@ class _RecipeTimeState extends State<RecipeTime> {
                                               color: color_palette[
                                                   "text_color_alt"]),
                                         ))))),
-                            Expanded(
-                                child: Container(
 
-                                    child: GestureDetector(
-                                        onTap: () {
-                                              Navigator.pop(context,
-                                                  {"hasResult": false});
-                                        },
-                                        child: Container(
-                                            height: 53.h,
-                                            child: Text(
-                                          "Cancel",
-
-                                              textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontSize: 26.5.h,
-                                              color: color_palette[
-                                                  "text_color_alt"]),
-                                        ))))),
                           ],
                         ))
                   ],

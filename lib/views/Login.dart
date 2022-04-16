@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mybmr/constants/Themes.dart';
 import 'package:mybmr/notifiers/UserNotifier.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/services/AppManager.dart';
@@ -48,56 +50,43 @@ class _LoginScreenState extends State<LoginScreen> {
         context: context,
         minTextAdapt: true,
         orientation: Orientation.portrait);
-
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: color_palette["background_color"],
+        systemNavigationBarColor: color_palette["background_color"],
+        systemNavigationBarDividerColor: color_palette["background_color"]));
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: color_palette["white"],
       resizeToAvoidBottomInset: false,
       body: Stack(children: [
         Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-            Color.fromARGB(200, 0, 0, 0),
-            Color.fromARGB(200, 0, 0, 0)
-          ], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
-          child: _controller.value.isInitialized
-              ? SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.fitHeight,
-                    child: SizedBox(
-                      width: _controller.value.size.width ?? 0,
-                      height: _controller.value.size.height ?? 0,
-                      child: VideoPlayer(_controller),
-                    ),
-                  ),
-                )
-              : Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.blue,
-                  ),
-                ),
+              color:    color_palette["background_color"],),
+
         ),
         Container(
-          width: MediaQuery.of(context).size.width - 53.h,
+          width: MediaQuery.of(context).size.width ,
           height: MediaQuery.of(context).size.height,
-          margin: EdgeInsets.fromLTRB(
-              20, MediaQuery.of(context).size.height * .05, 20, 15),
+          decoration: BoxDecoration( color: color_palette["semi_transparent"]),
+          padding: EdgeInsets.fromLTRB(
+              20 , MediaQuery.of(context).size.height * .08,  20 , 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                height: 200.h,
-                width: 220.h,
+                height: 304.75.h,
+                width: 304.75.h,
                 decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage(
-                          "assets/images/MyBMRLogo.png",
+                          "assets/images/MyBMR.png",
                         ),
                         fit: BoxFit.fill)),
               ),
               Spacer(),
               Container(
+
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
@@ -106,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: EdgeInsets.symmetric(vertical: 13.25.h),
                       child: Text(
                         en_messages["login_with"],
-                        style: TextStyle(fontSize: 34.h, color: Colors.white60),
+                        style: TextStyle(fontSize: 28.h, color: color_palette["semi_transparent"]),
                       ),
                     ),
                     Container(

@@ -104,9 +104,9 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
         return CustomRectTween(begin: begin, end: end);
       },
       child: Container(
-        width: 344.5.h,
+        width: 375.h,
         constraints: BoxConstraints(
-          maxWidth: 520
+          maxWidth: 520,minWidth: 250
         ),
         margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         decoration: BoxDecoration(

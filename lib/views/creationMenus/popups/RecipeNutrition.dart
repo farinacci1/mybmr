@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/models/Recipe.dart';
@@ -35,11 +36,20 @@ class RecipeNutrition extends StatelessWidget {
                 child: Container(
                     height: MediaQuery.of(context).size.height * .72,
                     width: max(min(MediaQuery.of(context).size.width * .85,700),320),
-                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.0),
-                        color: Colors.white,
+                        gradient: LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomCenter,
+                          colors: <Color>[
+                            Color(0xffd2ccc4),
+                            Color(0xff04619f),
+                            Color(0xff380036),
+                            Color(0xff380036),
+                            Color(0xff380036),
+                            Color(0xff380036),
+                          ],
+                        ),
                         boxShadow: [
                           BoxShadow(
                               color: Colors.grey.withOpacity(0.5),
@@ -48,19 +58,31 @@ class RecipeNutrition extends StatelessWidget {
                               offset: Offset(3, 3))
                         ]),
 
-                    child: Column(
+                    child: Stack(
+                      alignment: AlignmentDirectional.topEnd,
+                        children:[
+                          Column(
                       children: [
                         Expanded(
                           flex: 1, //
                           child: Container(
                             padding: EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: color_palette["semi_transparent"],
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20))
+                            ),
+
+                            width: double.infinity,
+                            alignment: AlignmentDirectional.center,
                             child: Title(
-                                color: Colors.black,
+                                color:color_palette["white"],
                                 child: Text(
                                   "Nutrition Info",
                                   style: TextStyle(
-                                      fontSize: 31.8.h,
-                                      decoration: TextDecoration.underline),
+                                      fontSize: 34.h,
+
+                                  color: color_palette["white"],
+                                  ),
                                 )),
                           ),
                         ),
@@ -69,6 +91,7 @@ class RecipeNutrition extends StatelessWidget {
                           child: Container(
                             width: double.infinity,
                             height: double.infinity,
+                            padding: EdgeInsets.symmetric(vertical: 10),
                             child:NotificationListener<OverscrollIndicatorNotification>(
                               onNotification: (overscroll){
                                 overscroll.disallowIndicator();
@@ -102,7 +125,7 @@ class RecipeNutrition extends StatelessWidget {
                                         children: [
                                           Text(
                                             fieldName,
-                                            style: TextStyle(fontSize: 26.h),
+                                            style: TextStyle(fontSize: 26.h,color: color_palette["white"],),
                                           ),
                                           Container(
                                             margin: EdgeInsets.only(left: 10),
@@ -110,7 +133,7 @@ class RecipeNutrition extends StatelessWidget {
                                           Text(val.toStringAsFixed(2) + label,
                                               style: TextStyle(
                                                   fontSize: 21.h,
-                                                  color:color_palette["text_color_dark"]))
+                                                  color:color_palette["text_color_alt"],))
                                         ],
                                       ),
                                     );
@@ -132,6 +155,22 @@ class RecipeNutrition extends StatelessWidget {
                           ),
                         )
                       ],
-                    )))));
+                    ),
+                          GestureDetector(
+                              onTap: (){
+                                Navigator.of(context).pop();
+                              },
+                              child:
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+
+                            child: Icon(
+                              AntDesign.closecircleo,
+                              size: 50.h,
+                              color: color_palette["white"],
+                            ),
+                          ))
+                    ])
+            ))));
   }
 }

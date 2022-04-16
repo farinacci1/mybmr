@@ -63,7 +63,22 @@ class _ReportPopupState extends State<ReportPopup> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
                 child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xffd2ccc4),
+                        Color(0xff04619f),
+                        Color(0xff380036),
+                        Color(0xff380036),
+                        Color(0xff380036),
+                        Color(0xff380036),
+                      ],
+                    ),
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -72,23 +87,22 @@ class _ReportPopupState extends State<ReportPopup> {
                         padding: EdgeInsets.symmetric(vertical: 3),
                         margin: EdgeInsets.only(bottom: 5),
                         alignment: AlignmentDirectional.center,
-                        decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(color: Colors.black))),
+
                         child: Text(
                           "Report",
-                          style: TextStyle(fontSize: 21.2.h),
+                          style: TextStyle(fontSize: 32.h,color: color_palette["white"]),
                         ),
                       ),
                       Container(
                           width: 344.5.h,
                           height: 53.h,
                           decoration: BoxDecoration(
-                              gradient: color_palette["gradient"],
+                              color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
                           margin: EdgeInsets.only(top: 5),
                           child: ElevatedButton(
                             onPressed: () {
+                              if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
                               reportRecipe(widget.recipe.id, 1);
                             },
                             style: ElevatedButton.styleFrom(
@@ -105,11 +119,12 @@ class _ReportPopupState extends State<ReportPopup> {
                           width: 344.5.h,
                           height: 53.h,
                           decoration: BoxDecoration(
-                              gradient: color_palette["gradient"],
+                              color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
                           margin: EdgeInsets.only(top: 5),
                           child: ElevatedButton(
                             onPressed: () {
+                              if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
                               reportRecipe(widget.recipe.id, 2);
                             },
                             style: ElevatedButton.styleFrom(
@@ -124,11 +139,12 @@ class _ReportPopupState extends State<ReportPopup> {
                           width: 344.5.h,
                           height: 53.h,
                           decoration: BoxDecoration(
-                              gradient: color_palette["gradient"],
+                              color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
                           margin: EdgeInsets.only(top: 5),
                           child: ElevatedButton(
                             onPressed: () {
+                              if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
                               reportRecipe(widget.recipe.id, 3);
                             },
                             style: ElevatedButton.styleFrom(
@@ -142,12 +158,14 @@ class _ReportPopupState extends State<ReportPopup> {
                       Container(
                           width: 344.5.h,
                           height: 53.h,
+
                           decoration: BoxDecoration(
-                              gradient: color_palette["gradient"],
+                              color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
-                          margin: EdgeInsets.only(top: 5),
+                          margin: EdgeInsets.only(top: 5,bottom: 10),
                           child: ElevatedButton(
                             onPressed: () {
+                              if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
                               reportRecipe(widget.recipe.id, 4);
                             },
                             style: ElevatedButton.styleFrom(
@@ -158,6 +176,7 @@ class _ReportPopupState extends State<ReportPopup> {
                               style: TextStyle(fontSize: 21.2.h),
                             ),
                           )),
+
                     ],
                   ),
                 ),

@@ -85,7 +85,7 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                               widget.recipe.recipeImageFromDB.length <= 0)
                               ? DecorationImage(
                               image:
-                              AssetImage("assets/images/BMRLogo.png"),
+                              AssetImage("assets/images/MyBMR.png"),
                               fit: BoxFit.cover)
                               : DecorationImage(
                               image:  NetworkImage( widget.recipe.recipeImageFromDB),
