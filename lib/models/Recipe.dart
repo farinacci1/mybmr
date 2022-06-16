@@ -33,6 +33,8 @@ class Recipe {
   String prepTime;
   String createdBy;
   int usedIn;
+  int commentCount;
+  List<String> likedBy = [];
   Map<String, int> flags = {};
   Map<String, double> nutritionalValue;
   get id => _id;
@@ -52,6 +54,7 @@ class Recipe {
     this.createdBy,
     this.peopleServed = 0.0,
     this.prepTime = "0 Days 0 Hrs 0 Min",
+    this.commentCount = 0
   });
 
   Recipe.fromJson({Map<String, Object> recipeRecords, String recipeId}) {
@@ -64,9 +67,11 @@ class Recipe {
     this.neededEquipmentIds = List.from(recipeRecords["neededEquipment"]);
     this.neededDiets = List.from(recipeRecords["diets"]);
     this.mealTimes = List.from(recipeRecords["mealTimes"]);
+    this.likedBy = recipeRecords["likedBy"] != null ? List.from(recipeRecords["likedBy"]) : [];
     this.steps = List.from(recipeRecords["steps"]);
     this.usedIn = recipeRecords["usedIn"];
     this.createdBy = recipeRecords["createdBy"];
+    this.commentCount =recipeRecords["commentCount"] ?? 0;
     this.recipeIngredients =
         (recipeRecords["recipeIngredients"] as List).map((e) {
       Map<String, dynamic> recipeIngredientObject = (e as Map<String, dynamic>);

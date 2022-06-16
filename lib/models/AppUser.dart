@@ -3,25 +3,26 @@ class AppUser{
   AppUser._();
   static AppUser get instance => _instance ??= AppUser._();
 
-  String _uuid;
+  String _uuid = "";
   String _signInMethod;
-  String _userName;
-  List<String> _myCreationIds =[];
-  List<String> _likedRecipesIds =[];
+  String _userName = "";
   List<String> _reportedRecipesIds =[];
   String _aboutUser;
   String _profileImagePath;
+  int numCreated;
+  int numLiked;
+  int numFollowedBy;
+  int numFollowing;
+  List<String> likedRecipes = [];
 
   AppUser.fromJSON(Map<String,dynamic> data){
     this._userName = data["userName"] ?? this._uuid;
-    this._myCreationIds =  List.from(data["myCreationIds"]);
-    this._likedRecipesIds =  List.from(data["likedRecipesIds"]);
     this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
-    this._myCreationIds = this._myCreationIds.toSet().toList();
-    this._likedRecipesIds = this._likedRecipesIds.toSet().toList();
     this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
     this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
     this._profileImagePath = data["profileImage"] ?? "";
+    this.numCreated = data["numCreated"] ?? 0;
+    this.numLiked = data["numLiked"] ?? 0;
 
   }
   String get uuid => _uuid;
@@ -32,40 +33,40 @@ class AppUser{
   void set aboutUser(String aboutMe){
     this._aboutUser = aboutMe;
   }
-  List<String> get myCreationIds => _myCreationIds;
-  List<String> get likedRecipesIds => _likedRecipesIds;
+
+
   List<String> get reportedRecipesIds => _reportedRecipesIds;
   void set userName(String userName){this._userName = userName;}
   String get userName => _userName;
   String get profileImagePath =>_profileImagePath;
   void set profileImagePath(String imagePath){this._profileImagePath = imagePath;}
   void clear(){
-    _myCreationIds.clear();
-    _likedRecipesIds.clear();
+
     _reportedRecipesIds.clear();
-    _userName = null;
+    likedRecipes.clear();
+    _userName = "";
+  }
+  void addLikeRecipe(String recipeId){
+    if(!likedRecipes.contains(recipeId)) likedRecipes.add(recipeId);
+  }
+  void removeLikedRecipe(String recipeId){
+    if(likedRecipes.contains(recipeId)) likedRecipes.remove(recipeId);
   }
 
   void fromJSON(Map<String,dynamic> data){
     this._userName = data["userName"] ?? this._uuid;
-    this._myCreationIds =  List.from(data["myCreationIds"]);
-    this._likedRecipesIds =  List.from(data["likedRecipesIds"]);
+
     this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
-    this._myCreationIds = this._myCreationIds.toSet().toList();
-    this._likedRecipesIds = this._likedRecipesIds.toSet().toList();
     this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
     this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
     this._profileImagePath = data["profileImage"] ?? null;
   }
 
-  void insertCreatedRecipe(String recipeId){
-    _myCreationIds.add(recipeId);
-  }
 
-  void insertLikedRecipe(String recipeId){
-    _likedRecipesIds.add(recipeId);
-  }
   void insertReportedRecipe(String recipeId){
-    _reportedRecipesIds.add(recipeId);
+    if(!_reportedRecipesIds.contains(recipeId)) _reportedRecipesIds.add(recipeId);
+  }
+  bool isUserSignedIn(){
+    return  this.uuid != null && this.uuid != "";
   }
 }

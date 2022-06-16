@@ -47,9 +47,12 @@ dependencies:
   animated_splash_screen: ^1.2.0
   page_transition: ^2.0.5
   google_fonts: ^2.3.1
-  image_crop: ^0.4.0
+
   visibility_detector: ^0.2.2
- 
+  image_cropper: ^1.5.1
+  flutter_datetime_picker: ^1.5.1
+  fancy_shimmer_image: ^2.0.2
+  flutter_staggered_animations: ^1.0.0
 
 
 
@@ -62,7 +65,7 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/BMRLogo.png"
+  image_path: "assets/images/MyBMR.png"
   remove_alpha_ios: true
 
 flutter:
@@ -76,5 +79,13 @@ flutter:
     - family: MyFlutterApp
       fonts:
         - asset: assets/fonts/MyFlutterApp.ttf
+    - family: Helvetica
+      fonts:
+        - asset: assets/fonts/helvetica.ttf
 
-
+    - family: Proxima
+      fonts:
+        - asset: assets/fonts/Proxima.ttf
+    - family: Araboto
+      fonts:
+        - asset: assets/fonts/Araboto.ttf

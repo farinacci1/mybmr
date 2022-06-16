@@ -98,9 +98,9 @@ class _OverlaySearchState extends State<OverlaySearch> {
                         BorderRadius.vertical(top: Radius.circular(79.5.h)),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 4,
-                        blurRadius: 4,
+                        color: color_palette["background_color"],
+                        spreadRadius: 2,
+                        blurRadius: 2,
                         offset: Offset(0, 0))
                   ]
                 ),
@@ -112,12 +112,7 @@ class _OverlaySearchState extends State<OverlaySearch> {
                       width: double.infinity,
                       margin: EdgeInsets.fromLTRB(13.25.h, 13.25.h, 13.25.h, 0),
                       height: 53.h,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                              width: 2.0, color:color_palette["text_color_dark"]),
-                        ),
-                      ),
+
                       child: AutoSizeText(
                         widget.title,
                         maxLines: 1,

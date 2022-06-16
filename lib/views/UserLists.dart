@@ -1,21 +1,23 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mybmr/models/Task.dart';
 import 'package:mybmr/notifiers/UserListNotifier.dart';
-import 'package:mybmr/constants/messages/en_messages.dart';
-import 'package:mybmr/models/ShoppingList.dart';
-import 'package:mybmr/models/UserNote.dart';
-import 'package:mybmr/views/creationMenus/builders/NoteBuilder.dart';
-import 'package:mybmr/views/creationMenus/builders/TaskBuilder.dart';
-import 'package:mybmr/widgets/ActionDialogue.dart';
-import 'package:mybmr/widgets/CornerListView.dart';
-import 'package:mybmr/widgets/CustomTile.dart';
+import 'package:mybmr/views/creationMenus/builders/EventBuilder.dart';
 import 'package:provider/provider.dart';
-
+import '../constants/Constants.dart';
 import '../constants/Themes.dart';
-import 'creationMenus/builders/shoppingListBuilder.dart';
+import '../models/Equipment.dart';
+import '../models/Event.dart';
+import '../models/Ingredient.dart';
+import '../models/ShoppingItem.dart';
+import '../notifiers/EquipmentNotifier.dart';
+import '../notifiers/IngredientNotifier.dart';
+import '../notifiers/SearchNotifier.dart';
+import '../services/hero_dialog_route.dart';
+import '../services/toast.dart';
+import '../widgets/OverlaySearch.dart';
+import 'creationMenus/popups/TaskPopup.dart';
 
 class UserList extends StatefulWidget {
   const UserList({Key key}) : super(key: key);
@@ -24,9 +26,17 @@ class UserList extends StatefulWidget {
 }
 
 class _UserListState extends State<UserList> {
+  int activeState = 0;
+  List<MyEvent> _events = [];
+
   @override
   Widget build(BuildContext context) {
-    Provider.of<UserListNotifier>(context, listen: true);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: color_palette["background_color"],
+      systemNavigationBarColor: color_palette["background_color"],
+      systemNavigationBarDividerColor: color_palette["background_color"],
+    ));
+    UserListNotifier userListNotifier = Provider.of<UserListNotifier>(context, listen: true);
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -40,293 +50,545 @@ class _UserListState extends State<UserList> {
         body: Stack(children: [
           Container(
               width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
               height: double.infinity,
-              decoration: BoxDecoration(gradient: color_palette["gradient"]),
+              decoration:
+                  BoxDecoration(color: color_palette["background_color"]),
               child: Column(children: [
                 Container(
-                    width: MediaQuery.of(context).size.width,
-                    alignment: AlignmentDirectional.center,
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top + 8, bottom: 7),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Icon(
-                                FontAwesomeIcons.solidListAlt,
-                                color: color_palette["white"],
-                                size: 31.8.h,
-                              )),
-                          AutoSizeText(
-                            en_messages["my_lists"],
-                            maxLines: 1,
-                            style: TextStyle(
-                                fontSize: 42.4.h,
-                                color: color_palette["white"]),
-                          ),
-                        ])),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Column(children: [
-                      Expanded(
-                        child: Container(
-                            margin: EdgeInsets.fromLTRB(10, 15, 10, 5),
-                            alignment: AlignmentDirectional.topCenter,
-                            child: Provider.of<UserListNotifier>(context,
-                                            listen: false)
-                                        .listIds
-                                        .length >
-                                    0
-                                ? NotificationListener<
-                                        OverscrollIndicatorNotification>(
-                                    onNotification: (overscroll) {
-                                      overscroll.disallowIndicator();
-                                      return;
-                                    },
-                                    child: Theme(
-                                        data: ThemeData(
-                                            canvasColor: Colors.transparent),
-                                        child: ReorderableListView.builder(
-                                          itemCount:
-                                              Provider.of<UserListNotifier>(
-                                                      context,
-                                                      listen: false)
-                                                  .userLists
-                                                  .length,
-                                          onReorder: ((oldIndex, newIndex) {
-                                            if (newIndex > oldIndex) {
-                                              newIndex -= 1;
-                                            }
-                                            Provider.of<UserListNotifier>(
-                                                    context,
-                                                    listen: false)
-                                                .reorderLists(
-                                                    oldIndex, newIndex);
-                                          }),
-                                          itemBuilder: (context, index) {
-                                            var item =
-                                                Provider.of<UserListNotifier>(
-                                                        context,
-                                                        listen: false)
-                                                    .userLists[index]
-                                                    .toJSON(isShared: true);
-                                            bool isShoppingList = item
-                                                .containsKey("shoppingItems");
-                                            bool isNote =
-                                                item.containsKey("body");
-                                            bool isTask =
-                                            item.containsKey("subtasks");
-                                            Widget model;
-                                            if (isShoppingList) {
-                                              model = CustomTile(
-                                                height: 50,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width -
-                                                    40,
-                                                color: color_palette["overlay"],
-                                                title: AutoSizeText(
-                                                  item["title"],
-                                                  style: TextStyle(
-                                                      color: color_palette[
-                                                          "white"]),
-                                                ),
-                                                radius:
-                                                    BorderRadius.circular(20),
-                                                subtitle: AutoSizeText(
-                                                  "Number of Items: " +
-                                                      List.from(item[
-                                                              "shoppingItems"])
-                                                          .length
-                                                          .toString(),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      color: color_palette[
-                                                          "text_color_alt"]),
-                                                ),
-                                                preceding: AutoSizeText("🛒",
-                                                    style: TextStyle(
-                                                        color: color_palette[
-                                                            "white"],
-                                                        fontSize: 28)),
-                                                trailing: Icon(
-                                                  FontAwesomeIcons.solidListAlt,
-                                                  color: color_palette["white"],
-                                                  size: 24,
-                                                ),
-                                              );
-                                            }
-                                            else if (isNote) {
-                                              model = CustomTile(
-                                                height: 50,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width -
-                                                    40,
-                                                color: color_palette["overlay"],
-                                                title: AutoSizeText(
-                                                  item["title"],
-                                                  style: TextStyle(
-                                                      color: color_palette[
-                                                          "white"]),
-                                                ),
-                                                radius:
-                                                    BorderRadius.circular(20),
-                                                subtitle: AutoSizeText(
-                                                  item["body"],
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      color: color_palette[
-                                                          "text_color_alt"]),
-                                                ),
-                                                preceding: AutoSizeText("📝",
-                                                    style: TextStyle(
-                                                        color: color_palette[
-                                                            "white"],
-                                                        fontSize: 28)),
-                                                trailing: Icon(
-                                                  FontAwesomeIcons.minus,
-                                                  color: color_palette["white"],
-                                                  size: 24,
-                                                ),
-                                              );
-                                            }
-                                            else if(isTask){
-                                              model = CustomTile(
-                                                height: 50,
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                    40,
-                                                color: color_palette["overlay"],
-                                                title: AutoSizeText(
-                                                  item["title"],
-                                                  style: TextStyle(
-                                                      color: color_palette[
-                                                      "white"]),
-                                                ),
-                                                radius:
-                                                BorderRadius.circular(20),
-                                                subtitle: AutoSizeText(
-                                                 "Completed ${item["hasCompleted"].where((e) => e == true).length.toString()} of ${item["subtasks"].length.toString()}" ,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                  TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                      color: color_palette[
-                                                      "text_color_alt"]),
-                                                ),
-                                                preceding: AutoSizeText("✓",
-                                                    style: TextStyle(
-                                                        color: color_palette[
-                                                        "white"],
-                                                        fontSize: 28)),
-                                                trailing: Icon(
-                                                  FontAwesomeIcons.minus,
-                                                  color: color_palette["white"],
-                                                  size: 24,
-                                                ),
-                                              );
-                                            }
-                                            return Dismissible(
-                                                key: ValueKey(item["id"]),
-                                                confirmDismiss:
-                                                    (DismissDirection
-                                                        direction) async {
-                                                  if (direction ==
-                                                      DismissDirection
-                                                          .endToStart) {
-                                                    return await
-                                                           ActionDialogue(
-                                                            message: isShoppingList
-                                                                ? en_messages[
-                                                            "remove_shoppingList_question"]
-                                                                :isNote ? en_messages[
-                                                            "remove_note_question"]:
-                                                             en_messages["remove_task_question"],
-                                                            approveAction: (){
-                                                              Provider.of<UserListNotifier>(
-                                                                  context,
-                                                                  listen:
-                                                                  false)
-                                                                  .removeListItem(
-                                                                  item["id"]);
-                                                            },
-
-                                                          ).build(context);
-                                                       
-                                                  }
-                                                  return null;
-                                                },
-                                                child: GestureDetector(
-                                                    onTap: () async {
-                                                      if (isShoppingList) {
-                                                        await Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder:
-                                                                    (context) {
-                                                          return ShoppingListBuilder(
-                                                            shoppingList:
-                                                                ShoppingList
-                                                                    .fromJSON(
-                                                                        item,
-                                                                        item[
-                                                                            "id"]),
-                                                          );
-                                                        }));
-                                                      } else if(isNote){
-                                                        await Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder:
-                                                                    (context) {
-                                                          return NoteBuilder(
-                                                            note: UserNote
-                                                                .fromJSON(item,
-                                                                    item["id"]),
-                                                          );
-                                                        }));
-                                                      }else{
-                                                        await Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder:
-                                                                    (context) {
-                                                                  return TaskBuilder(
-                                                                    task: UserTask
-                                                                        .fromJSON(item,
-                                                                        item["id"]),
-                                                                  );
-                                                                }));
-                                                      }
-                                                    },
-                                                    child: model));
-                                          },
-                                        )))
-                                : Center(
-                                    child: AutoSizeText(
-                                    en_messages["no_lists_found"],
-                                    maxLines: 3,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 23.h),
-                                  ))),
+                  padding: EdgeInsets.fromLTRB(10, 20, 0, 0),
+                  decoration:
+                      BoxDecoration(color: color_palette["background_color"]),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(bottom: 15),
+                        alignment: AlignmentDirectional.center,
+                        child: AutoSizeText(
+                          "My Lists",
+                          maxLines: 1,
+                          style: TextStyle(
+                              color: color_palette["white"], fontSize: 50.4.h),
+                        ),
                       ),
-                    ]),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.only(bottom: 9),
+                        alignment: AlignmentDirectional.topStart,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                "Categories".toUpperCase(),
+                                style: TextStyle(
+                                    fontSize: 18.h,
+                                    color: color_palette["offWhite"]),
+                              ),
+                            ),
+                            Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: 130.h,
+                                margin: EdgeInsets.only(bottom: 10),
+                                alignment: AlignmentDirectional.centerStart,
+                                child: NotificationListener<
+                                    OverscrollIndicatorNotification>(
+                                  onNotification: (overscroll) {
+                                    overscroll.disallowIndicator();
+                                    return;
+                                  },
+                                  child: ListView(
+                                    itemExtent: 210.h,
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    children: [
+                                      listOption(
+                                          height: 120.h,
+                                          primaryLabel: "Tasks",
+                                          secondaryLabel: userListNotifier.taskList == null ? "0 of 0 Done":
+                                              "${userListNotifier.taskList.hasCompleted.where((e) => e == true).length} of ${userListNotifier.taskList.subtasks.length} Done",
+                                          bgColor: color_palette["overlay"],
+                                          onTap: () {
+                                            setState(() {
+                                              activeState = 0;
+                                            });
+                                          }),
+                                      listOption(
+                                          height: 120.h,
+                                          primaryLabel: "Groceries",
+                                          secondaryLabel: "${userListNotifier.groceryList.shoppingItems.length} Items",
+                                          bgColor: color_palette["overlay"],
+                                          onTap: () {
+                                            setState(() {
+                                              activeState = 1;
+                                            });
+                                          }),
+                                      listOption(
+                                          height: 120.h,
+                                          primaryLabel: "Events",
+                                          secondaryLabel: "${_events.length} Events",
+                                          bgColor: color_palette["overlay"],
+                                          onTap: () {
+                                            setState(() {
+                                              activeState = 2;
+                                            });
+                                          }),
+                                    ],
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                Expanded(
+                    child: Container(
+                  color: color_palette["semi_transparent"],
+                  child: Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        child: Text(
+                          (activeState == 0)
+                              ? "MY TASKS"
+                              : (activeState == 1)
+                                  ? "MY GROCERIES"
+                                  : "MY EVENTS",
+                          style: TextStyle(
+                              color: color_palette["offWhite"], fontSize: 18.h),
+                        ),
+                      ),
+                      (activeState == 0) ? taskPage() : (activeState == 1)
+                          ? shoppingPage() : eventsPage()
+                    ],
+                  ),
+                )),
               ])),
-          CornerActionList(
-            radius: 66.25.h,
-            duration: Duration(milliseconds: 1000),
-          )
         ]));
+  }
+
+  Widget listOption(
+      {double height = 100,
+      String primaryLabel = "To Do",
+      String secondaryLabel = "Tasks",
+      Color bgColor = Colors.grey,
+      VoidCallback onTap}) {
+    return GestureDetector(
+        onTap: () {
+          if (onTap != null) onTap();
+        },
+        child: Container(
+          height: height,
+          margin: EdgeInsets.only(top: 5, right: 15),
+          padding: EdgeInsets.fromLTRB(10, 18, 10, 5),
+          decoration: BoxDecoration(
+              color: bgColor, borderRadius: BorderRadius.circular(20)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 5),
+                child: Text(secondaryLabel,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 18.h, color: color_palette["offWhite"])
+                ),
+              ),
+              Text(
+                primaryLabel,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 36.h, color: Colors.white),
+              )
+            ],
+          ),
+        ));
+  }
+
+  Widget taskPage() {
+    UserListNotifier userListNotifier = Provider.of<UserListNotifier>(context,listen: false);
+    return Expanded(
+      child: Container(
+        child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (overscroll) {
+              overscroll.disallowIndicator();
+              return;
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                    child: Container(
+                  child: Column(
+                    children: [
+                      Expanded(
+                          child: Container(
+                        child:userListNotifier.taskList != null && userListNotifier.taskList.subtasks.length > 0
+                            ? Column(
+                                children: List.generate(userListNotifier.taskList.subtasks.length,
+                                    (int idx) {
+                                return Dismissible(
+                                    key: UniqueKey(),
+                                    confirmDismiss:
+                                        (DismissDirection direction) async {
+                                      if (direction ==
+                                          DismissDirection.endToStart) {
+                                        userListNotifier.removeFromTaskList(idx);
+                                        return true;
+                                      }
+                                      return false;
+                                    },
+                                    child: Container(
+                                        child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Transform.scale(
+                                            scale: 1.5,
+                                            child: Theme(
+                                                data:
+                                                    Theme.of(context).copyWith(
+                                                  unselectedWidgetColor:
+                                                      color_palette["white"],
+                                                ),
+                                                child: Checkbox(
+                                                  value: userListNotifier.taskList.hasCompleted[idx],
+                                                  checkColor: color_palette[
+                                                      "text_color_dark"],
+                                                  activeColor:
+                                                      color_palette["white"],
+                                                  shape: CircleBorder(),
+                                                  onChanged: (newValue) {
+                                                    userListNotifier.changeTaskState(idx);
+
+                                                  },
+                                                ))),
+                                        AnimatedContainer(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width -
+                                                80,
+                                            duration:
+                                                Duration(milliseconds: 800),
+                                            child: Text(
+                                              userListNotifier.taskList.subtasks[idx],
+                                              textAlign: TextAlign.justify,
+                                              maxLines: null,
+                                              style: TextStyle(
+                                                  color: ! userListNotifier.taskList.hasCompleted[idx]
+                                                      ? color_palette["white"]
+                                                      : color_palette[
+                                                          "text_color_alt"],
+                                                  fontSize: 34.h),
+                                            )),
+                                      ],
+                                    )));
+                              }
+                                    // some widgets here
+                                    ).toList())
+                            : Container(),
+                      )),
+                      Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 70.h,
+                          margin: EdgeInsets.fromLTRB(10, 10, 10, 3),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Map<String, dynamic> out =
+                                  await Navigator.of(context)
+                                      .push(HeroDialogRoute(builder: (context) {
+                                return TaskPopup();
+                              }));
+                              if (out != null && out.containsKey("value")) {
+                                userListNotifier.addTaskToList(out["value"]);
+                              }
+                            },
+                            child: Text("Add Task"),
+                            style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15)),
+                                elevation: 8,
+                                primary: color_palette["overlay"]),
+                          )),
+                    ],
+                  ),
+                )),
+              ],
+            )),
+      ),
+    );
+  }
+
+  Widget shoppingPage() {
+    UserListNotifier userListNotifier = Provider.of<UserListNotifier>(context,listen: false);
+    return Expanded(
+      child: Container(
+        child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (overscroll) {
+              overscroll.disallowIndicator();
+              return;
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                    child: Container(
+                  child: Column(
+                    children: [
+                      Expanded(
+                          child: Container(
+                        child: userListNotifier.groceryList.shoppingItems.length > 0
+                            ? Column(
+                                children: List.generate(userListNotifier.groceryList.shoppingItems.length,
+                                    (int idx) {
+                                return Dismissible(
+                                    key: UniqueKey(),
+                                    confirmDismiss:
+                                        (DismissDirection direction) async {
+                                      if (direction ==
+                                          DismissDirection.endToStart) {
+                                        userListNotifier.removeGroceryItem(idx);
+                                        return true;
+                                      }
+                                      return false;
+                                    },
+                                    child: Container(
+                                        padding:
+                                            EdgeInsets.fromLTRB(15, 0, 15, 4),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                                padding:
+                                                    EdgeInsets.only(right: 8),
+                                                child: CircleAvatar(
+                                                    radius: 39.75.h / 2,
+                                                    backgroundImage:
+                                                        NetworkImage(
+                                                            userListNotifier.groceryList.shoppingItems[idx]
+                                                                .image))),
+                                            Expanded(
+                                                child: Text(
+                                                    userListNotifier.groceryList.shoppingItems[idx].name,
+                                                    style: TextStyle(
+                                                        color: color_palette[
+                                                            "white"],
+                                                        fontSize: 32.h)))
+                                          ],
+                                        )));
+                              }
+                                    // some widgets here
+                                    ).toList())
+                            : Container(),
+                      )),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 70.h,
+                        margin: EdgeInsets.fromLTRB(0, 10, 0, 3),
+                        child: Row(
+                          children: [ingredientButton(), equipmentButton()],
+                        ),
+                      )
+                    ],
+                  ),
+                )),
+              ],
+            )),
+      ),
+    );
+  }
+
+  void resetIllusion() {
+    Provider.of<SearchNotifier>(context, listen: false).searchMode =
+        MenuType.NONE;
+    Provider.of<EquipmentNotifier>(context, listen: false).optionSelected =
+        false;
+    Provider.of<IngredientNotifier>(context, listen: false).optionSelected =
+        false;
+  }
+
+  Widget ingredientButton() {
+    UserListNotifier userListNotifier = Provider.of<UserListNotifier>(context,listen: false);
+    return GestureDetector(
+        onTap: () async {
+          resetIllusion();
+          Provider.of<SearchNotifier>(context, listen: false).searchMode =
+              MenuType.INGREDIENTS;
+          Map<String, dynamic> data = await Navigator.of(context)
+              .push(HeroDialogRoute(builder: (context) {
+            return OverlaySearch(
+              title: "Ingredient",
+              inShopping: true,
+            );
+          }));
+
+          if (data != null && data.containsKey("ingredient")) {
+            Ingredient ingredient = data["ingredient"];
+            ShoppingItem shoppingItem = userListNotifier.groceryList.shoppingItems.firstWhere((item) {
+              return (item.id == ingredient.id && item.isIngredient == true);
+            }, orElse: () {
+              return null;
+            });
+            if (shoppingItem == null) {
+              userListNotifier.groceryList.shoppingItems.add(ShoppingItem(
+                  id: ingredient.id,
+                  amount: 0,
+                  valueType: shoppingValues[0],
+                  image: ingredient.ingredientImageFromDB,
+                  name: ingredient.ingredientName,
+                  isEquipment: false,
+                  isIngredient: true));
+              setState(() {});
+            } else {
+              CustomToast("Item already exists in list");
+            }
+          }
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width / 2,
+          height: (MediaQuery.of(context).size.width / 7.5),
+          alignment: AlignmentDirectional.center,
+          decoration: BoxDecoration(
+              color: color_palette["semi_transparent"],
+              border: Border(
+                  right: BorderSide(width: 0.5, color: color_palette["tone"]))),
+          child: Text(
+            "Add Ingredient",
+            style: TextStyle(color: color_palette["white"], fontSize: 25.h),
+          ),
+        ));
+  }
+
+  Widget equipmentButton() {
+    UserListNotifier userListNotifier = Provider.of<UserListNotifier>(context,listen: false);
+    return GestureDetector(
+        onTap: () async {
+          resetIllusion();
+          Provider.of<SearchNotifier>(context, listen: false).searchMode =
+              MenuType.EQUIPMENT;
+
+          Map<String, dynamic> data = await Navigator.of(context)
+              .push(HeroDialogRoute(builder: (context) {
+            return OverlaySearch(title: "Equipment", inShopping: true);
+          }));
+          if (data != null && data.containsKey("equipment")) {
+            Equipment equipmentItem = data["equipment"];
+            ShoppingItem shoppingItem = userListNotifier.groceryList.shoppingItems.firstWhere((item) {
+              return (item.id == equipmentItem.id && item.isEquipment == true);
+            }, orElse: () {
+              return null;
+            });
+            if (shoppingItem == null) {
+              ShoppingItem shoppingItem =ShoppingItem(
+                  id: equipmentItem.id,
+                  amount: 0,
+                  valueType: shoppingValues[0],
+                  image: equipmentItem.equipmentImageFromDb,
+                  name: equipmentItem.name,
+                  isEquipment: true,
+                  isIngredient: false);
+              userListNotifier.addGroceryItem(shoppingItem);
+            } else {
+              CustomToast("Item already exists in list");
+            }
+          }
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width / 2,
+          height: (MediaQuery.of(context).size.width / 7.5),
+          alignment: AlignmentDirectional.center,
+          decoration: BoxDecoration(
+              color: color_palette["semi_transparent"],
+              border: Border(
+                  left: BorderSide(width: 0.5, color: color_palette["tone"]))),
+          child: Text(
+            "Add Equipment",
+            style: TextStyle(color: color_palette["white"], fontSize: 25.h),
+          ),
+        ));
+  }
+
+  Widget eventsPage(){
+    return Expanded(
+      child: Container(
+        child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (overscroll) {
+              overscroll.disallowIndicator();
+              return;
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                    child: Container(
+                      child: Column(
+                        children: [
+                          Expanded(
+                              child: Container(
+                                child: _events.length > 0
+                                    ? Column(
+                                    children: List.generate(_events.length,
+                                            (int idx) {
+                                          return Dismissible(
+                                              key: UniqueKey(),
+                                              confirmDismiss:
+                                                  (DismissDirection direction) async {
+                                                if (direction ==
+                                                    DismissDirection.endToStart) {
+                                                  setState(() {
+                                                    _events.removeAt(idx);
+                                                  });
+
+                                                  return true;
+                                                }
+                                                return false;
+                                              },
+                                              child: Container(
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                    children: [
+                                                    ],
+                                                  )));
+                                        }
+                                      // some widgets here
+                                    ).toList())
+                                    : Container(),
+                              )),
+                          Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: 70.h,
+                              margin: EdgeInsets.fromLTRB(10, 10, 10, 3),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  Map<String, dynamic> out =
+                                  await Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (context) {
+                                    return EventBuilder();
+                                  }));
+                                  if (out != null && out.containsKey("value")) {
+                                    _events.add(out["value"]);
+                                    setState(() {});
+                                  }
+                                },
+                                child: Text("Add Event"),
+                                style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15)),
+                                    elevation: 8,
+                                    primary: color_palette["overlay"]),
+                              )),
+                        ],
+                      ),
+                    )),
+              ],
+            )),
+      ),
+    );
   }
 }

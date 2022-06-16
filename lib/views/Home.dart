@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -8,15 +10,13 @@ import 'package:mybmr/notifiers/MealPlanNotifier.dart';
 import 'package:mybmr/notifiers/RecipeNotifier.dart';
 import 'package:mybmr/notifiers/UserListNotifier.dart';
 import 'package:mybmr/notifiers/UserNotifier.dart';
-import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/models/AppUser.dart';
-import 'package:mybmr/services/toast.dart';
 import 'package:mybmr/views/Login.dart';
 import 'package:mybmr/views/MealPlannerDisplay.dart';
 import 'package:mybmr/views/RecipePageView.dart';
 import 'package:mybmr/views/UserLists.dart';
 import 'package:mybmr/views/creationMenus/builders/RecipeBuilder.dart';
-import 'package:mybmr/widgets/RecipeChoice.dart';
+import 'package:mybmr/widgets/BottomMenu.dart';
 
 import 'package:provider/provider.dart';
 
@@ -42,39 +42,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         MealPlanNotifier mealPlanNotifier =
             Provider.of<MealPlanNotifier>(context, listen: false);
 
-        if (AppUser.instance.uuid != null && AppUser.instance.uuid != "") {
+        if ( AppUser.instance.isUserSignedIn()) {
           if (mealPlanNotifier.mealPlans.length == 0 &&
               mealPlanNotifier.isFetching == false)
             mealPlanNotifier.getMealPlansFromDB();
         }
-        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
-          CustomToast(en_messages["sign_in_required"]);
-        }
+
         return MealPlannerDisplay();
       case 2:
-        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
-          CustomToast(en_messages["sign_in_required"]);
-        }
+
         return RecipeBuilder();
       case 3:
-        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
-          CustomToast(en_messages["sign_in_required"]);
-        } else {
+        if ( AppUser.instance.isUserSignedIn()) {
+
           if (Provider.of<UserListNotifier>(context, listen: false)
                       .isCurrentlyFetching ==
                   false &&
               Provider.of<UserListNotifier>(context, listen: false)
-                      .listIds
-                      .length ==
-                  0)
-            Provider.of<UserListNotifier>(context, listen: false)
-                .fetchUsersListIds();
+                      .groceryList == null &&  Provider.of<UserListNotifier>(context, listen: false).taskList == null)
+            Provider.of<UserListNotifier>(context, listen: false).fetchUserList();
         }
         return UserList();
       case 4:
-        if (AppUser.instance.uuid == null || AppUser.instance.uuid == "") {
+        if ( !AppUser.instance.isUserSignedIn()) {
           return LoginScreen();
         } else {
+          Provider.of<RecipeNotifier>(context,listen: false).recipes.forEach((rec) {
+            if(rec.likedBy.contains(AppUser.instance.uuid))
+            AppUser.instance.addLikeRecipe(rec.id);
+          });
+
           FavoritesNotifier favoritesNotifier =
               Provider.of<FavoritesNotifier>(context, listen: false);
           if (!favoritesNotifier.currentlyFetchingMyRecipes &&
@@ -127,45 +124,56 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         orientation: Orientation.portrait);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: color_palette["white"],
+
+      appBar:    AppBar(
+        toolbarHeight: 0,
+
+        backgroundColor:   this.activeView == 0 ? color_palette["white"] :color_palette["background_color"] ,
+        elevation: 0.0,
+        actionsIconTheme: IconThemeData(opacity: 0.0),
+        systemOverlayStyle:   SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+
+        flexibleSpace: FlexibleSpaceBar(
+          stretchModes: [StretchMode.fadeTitle],
+        ),
+      ),
       bottomNavigationBar: FlashyTabBar(
         animationCurve: Curves.linear,
         selectedIndex: activeView,
         iconSize: 30.h,
-        height: 80.h,
+        height: min(max(80.h,55),100),
         showElevation: true,
-        backgroundColor: color_palette["background_color"],
+        backgroundColor:color_palette["background_color"],
         onItemSelected: (index) => setState(() {
           if (index != 2) {
             createRecipeRequested = false;
             this.activeView = index;
-          } else if (this.activeView != 4 ||
-              (AppUser.instance.uuid != "" && AppUser.instance.uuid != null))
+          } else if (this.activeView != 4 || AppUser.instance.isUserSignedIn())
             createRecipeRequested = true;
         }),
         items: [
           FlashyTabBarItem(
             activeColor: color_palette["white"],
-            inactiveColor: color_palette["white"],
+            inactiveColor:color_palette["white"],
             icon: Icon(AntDesign.home),
             title: Text(
               'Discover',
             ),
           ),
           FlashyTabBarItem(
-            activeColor: color_palette["white"],
+            activeColor:color_palette["white"],
             inactiveColor: color_palette["white"],
             icon: Icon(AntDesign.calendar),
             title: Text('Meal Plans'),
           ),
           FlashyTabBarItem(
-            activeColor: color_palette["white"],
-            inactiveColor: color_palette["white"],
+            activeColor:color_palette["white"],
+            inactiveColor:color_palette["white"],
             icon: Icon(AntDesign.pluscircleo),
             title: Text('Create'),
           ),
           FlashyTabBarItem(
-            activeColor: color_palette["white"],
+            activeColor:color_palette["white"],
             inactiveColor: color_palette["white"],
             icon: Icon(MaterialIcons.filter_list),
             title: Text('Lists'),
@@ -183,7 +191,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         alignment: AlignmentDirectional.bottomCenter,
         children: [
           getPage(context),
-          RecipeChoice(
+          BottomMenu(
             isHidden: !createRecipeRequested,
             backgroundColor: color_palette["background_color"],
             children: [
@@ -204,21 +212,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      width: double.infinity,
-                      alignment: AlignmentDirectional.center,
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      decoration: BoxDecoration(
-                          color: color_palette["alternative"],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text("Share Post",
-                          style: TextStyle(
-                              color: color_palette["white"], fontSize: 22.h)),
-                    ),
-                  ),
+
                   GestureDetector(
                     onTap: () async {
                       await Navigator.push(
@@ -243,21 +237,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                               color: color_palette["white"], fontSize: 22.h)),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      width: double.infinity,
-                      alignment: AlignmentDirectional.center,
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      decoration: BoxDecoration(
-                          color: color_palette["alternative"],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text("Share video short",
-                          style: TextStyle(
-                              color: color_palette["white"], fontSize: 22.h)),
-                    ),
-                  )
+
                 ],
               ))),
             ],

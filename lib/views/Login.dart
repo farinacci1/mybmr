@@ -5,7 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mybmr/constants/Themes.dart';
 import 'package:mybmr/notifiers/UserNotifier.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
-import 'package:mybmr/services/AppManager.dart';
 import 'package:mybmr/services/PlatformManager.dart';
 import 'package:mybmr/services/toast.dart';
 import 'package:provider/provider.dart';
@@ -17,26 +16,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  VideoPlayerController _controller;
+
 
   @override
   void initState() {
-    _controller = VideoPlayerController.asset('assets/videos/ripe.mp4');
-    _controller.setLooping(true);
-    _controller.setPlaybackSpeed(1.75);
-    _controller
-      ..initialize().then((_) {
-        setState(() {
-          _controller.play();
-        });
-      });
+
 
     super.initState();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+
     super.dispose();
   }
 
@@ -51,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
         minTextAdapt: true,
         orientation: Orientation.portrait);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+
         statusBarColor: color_palette["background_color"],
         systemNavigationBarColor: color_palette["background_color"],
         systemNavigationBarDividerColor: color_palette["background_color"]));

@@ -3,11 +3,13 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
+import 'package:mybmr/services/helper.dart';
 import 'package:mybmr/widgets/ImageCropper.dart';
 
 import 'package:provider/provider.dart';
@@ -37,7 +39,7 @@ import 'package:mybmr/widgets/showSteps.dart';
 import '../../../constants/Themes.dart';
 import '../../../models/Equipment.dart';
 import '../../../services/toast.dart';
-import '../../../widgets/HeaderBar.dart';
+
 
 class RecipeBuilder extends StatefulWidget {
   final Recipe recipe;
@@ -120,111 +122,108 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
         },
         child: Scaffold(
           resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+         systemOverlayStyle: SystemUiOverlayStyle(
+           statusBarColor:  color_palette["background_color"],
+         ),
+            backgroundColor:  color_palette["background_color"],
+            title: Text( en_messages["recipe_builder"],style: TextStyle(
+                fontSize: 34.45.h,
+                color: Colors.white,
+                fontWeight: FontWeight.bold
+            ),),
+
+            actions: [
+              IconButton(
+                  icon: Icon(MaterialIcons.send),
+                onPressed: ()
+                {
+                  String title = _titleController.value.text ?? "";
+                  title = title.trim();
+                  title = title.replaceAll(RegExp('\\s+'), " ");
+                  String description =
+                      _descriptionController.value.text ?? "";
+                  description = description.trim();
+                  description = description.replaceAll(RegExp('\\s+'), " ");
+
+                  if (title.length == 0 ||
+                      description.length == 0 ||
+                      Provider.of<IngredientNotifier>(context, listen: false)
+                          .ingredientList_inUse
+                          .length ==
+                          0 ||
+                      Provider.of<EquipmentNotifier>(context, listen: false)
+                          .equipmentList_inUse
+                          .length ==
+                          0 ||
+                      activeMeals.length == 0 ||
+                      activeDiets.length == 0 ||
+                      steps.length == 0 ||
+                      _servesController.value.text.length == 0) {
+                    CustomToast(en_messages["recipe_empty_fields_found"]);
+                  } else if (activeMeals.length > 3) {
+                    CustomToast(en_messages["recipe_max_cuisine"]);
+                  } else if (activeDiets.length > 6) {
+                    CustomToast(en_messages["recipe_max_diets"]);
+                  } else {
+                    Recipe recipe;
+                    List<String> instructions =
+                    steps.map((RecipeStep step) => step.string).toList();
+                    if (imageFile != null || imageFromDb != null) {
+                      double servings =
+                      double.parse(_servesController.value.text);
+                      if (servings <= 0)
+                        CustomToast(
+                            en_messages["recipe_invalid_serving_size"]);
+                      else {
+                        if (invalidIngredients.length > 0) {
+                          CustomToast(
+                              en_messages["recipe_invalid_ingredients"]);
+                        } else {
+                          recipe = Recipe(
+                              title: title,
+                              description: description,
+                              recipeImage: imageFile,
+                              recipeIngredients: List.from(
+                                  Provider.of<IngredientNotifier>(context,
+                                      listen: false)
+                                      .recipeIngredients),
+                              neededEquipmentIds: List.from(
+                                  Provider.of<EquipmentNotifier>(context,
+                                      listen: false)
+                                      .equipmentList_inUse
+                                      .map((Equipment equip) => equip.id)
+                                      .toList()),
+                              prepTime: totalTime,
+                              peopleServed: servings,
+                              steps: instructions,
+                              neededDiets: List.from(activeDiets),
+                              mealTimes: List.from(activeMeals));
+                          if (widget.recipe == null ||
+                              widget.shouldClone == true)
+                            createRecipe(recipe);
+                          else
+                            updateRecipe(recipe);
+                        }
+                      }
+                    } else
+                      CustomToast(en_messages["recipe_missing_image"]);
+                  }
+                },
+              ),
+            ],
+          ),
           body: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-                gradient: color_palette["gradient"]
-
-            ),
+            color:  color_palette["background_color"],
             child: Column(
               children: [
-                HeaderBar(
-                  popWidget:
-                       Icon(
-                          Icons.arrow_back,
-                          color: color_palette["white"],
-                          size: 31.8.h,
-            ),
-                  onPopCallback: () {
-                    clearRecipe();
-                  },
-                  title: en_messages["recipe_builder"],
-                  submitColor: color_palette["text_color_dark"],
-                  submitWidget: Text(
-                    widget.recipe != null && widget.shouldClone == false
-                        ? en_messages["update_label"]
-                        : en_messages["save_label"],
-                    textScaleFactor: 1.0,
-                    style: TextStyle(color: color_palette["white"], fontSize: 20.h),
-                  ),
-                  submitCallback: () {
-                    String title = _titleController.value.text ?? "";
-                    title = title.trim();
-                    title = title.replaceAll(RegExp('\\s+'), " ");
-                    String description =
-                        _descriptionController.value.text ?? "";
-                    description = description.trim();
-                    description = description.replaceAll(RegExp('\\s+'), " ");
 
-                    if (title.length == 0 ||
-                        description.length == 0 ||
-                        Provider.of<IngredientNotifier>(context, listen: false)
-                                .ingredientList_inUse
-                                .length ==
-                            0 ||
-                        Provider.of<EquipmentNotifier>(context, listen: false)
-                                .equipmentList_inUse
-                                .length ==
-                            0 ||
-                        activeMeals.length == 0 ||
-                        activeDiets.length == 0 ||
-                        steps.length == 0 ||
-                        _servesController.value.text.length == 0) {
-                      CustomToast(en_messages["recipe_empty_fields_found"]);
-                    } else if (activeMeals.length > 3) {
-                      CustomToast(en_messages["recipe_max_cuisine"]);
-                    } else if (activeDiets.length > 6) {
-                      CustomToast(en_messages["recipe_max_diets"]);
-                    } else {
-                      Recipe recipe;
-                      List<String> instructions =
-                          steps.map((RecipeStep step) => step.string).toList();
-                      if (imageFile != null || imageFromDb != null) {
-                        double servings =
-                            double.parse(_servesController.value.text);
-                        if (servings <= 0)
-                          CustomToast(
-                              en_messages["recipe_invalid_serving_size"]);
-                        else {
-                          if (invalidIngredients.length > 0) {
-                            CustomToast(
-                                en_messages["recipe_invalid_ingredients"]);
-                          } else {
-                            recipe = Recipe(
-                                title: title,
-                                description: description,
-                                recipeImage: imageFile,
-                                recipeIngredients: List.from(
-                                    Provider.of<IngredientNotifier>(context,
-                                            listen: false)
-                                        .recipeIngredients),
-                                neededEquipmentIds: List.from(
-                                    Provider.of<EquipmentNotifier>(context,
-                                            listen: false)
-                                        .equipmentList_inUse
-                                        .map((Equipment equip) => equip.id)
-                                        .toList()),
-                                prepTime: totalTime,
-                                peopleServed: servings,
-                                steps: instructions,
-                                neededDiets: List.from(activeDiets),
-                                mealTimes: List.from(activeMeals));
-                            if (widget.recipe == null ||
-                                widget.shouldClone == true)
-                              createRecipe(recipe);
-                            else
-                              updateRecipe(recipe);
-                          }
-                        }
-                      } else
-                        CustomToast(en_messages["recipe_missing_image"]);
-                    }
-                  },
-                ),
+
                 Expanded(
                     child: Container(
-                        decoration: BoxDecoration(color: color_palette["tone"]),
+                        color:  color_palette["semi_transparent"],
                         child: NotificationListener<
                                 OverscrollIndicatorNotification>(
                             onNotification: (overscroll) {
@@ -256,12 +255,16 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                               Map<String, dynamic> out =
                                                   await Navigator.of(context)
                                                       .push(HeroDialogRoute(
+
                                                           builder: (context) {
                                                 return RecipeImporter();
                                               }));
                                               if (out != null) {
                                                 setFromImported(out);
                                               }
+                                              SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                                                  statusBarColor: Colors.transparent
+                                                 ));
                                             },
                                             child: Text(
                                               en_messages["import_label"],
@@ -328,8 +331,8 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                                   maxHeight: 1024,
                                                   maxWidth: 1024);
                                           if (pickedFile != null) {
-                                            imageFile = File(pickedFile.path);
-                                            await _cropImage();
+                                            imageFile = await MyImageCropper.cropImage(File(pickedFile.path));
+
                                             setState(() {});
                                           }
                                         } catch (_) {}
@@ -751,20 +754,20 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                         },
                                       ),
                                     Container(
-                                      margin:
-                                          EdgeInsets.symmetric(vertical: 10),
                                       height: 47.7.h,
+                                      margin:
+                                      EdgeInsets.symmetric(vertical: 10),
                                       child: ElevatedButton(
                                         onPressed: () async {
                                           Map<String, dynamic> out =
-                                              await Navigator.of(context).push(
-                                                  HeroDialogRoute(
-                                                      builder: (context) {
-                                            return StepPopup(
-                                              stepIndex: steps.length + 1,
-                                              stepRange: steps.length + 1,
-                                            );
-                                          }));
+                                          await Navigator.of(context).push(
+                                              HeroDialogRoute(
+                                                  builder: (context) {
+                                                    return StepPopup(
+                                                      stepIndex: steps.length + 1,
+                                                      stepRange: steps.length + 1,
+                                                    );
+                                                  }));
                                           if (out != null) {
                                             String step = out["step"];
                                             if (step.length > 0) {
@@ -776,8 +779,8 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                                         string: step,
                                                         stepNum: stepNum - 1));
                                                 for (int i = stepNum;
-                                                    i < steps.length;
-                                                    i++) {
+                                                i < steps.length;
+                                                i++) {
                                                   steps[i].stepNum = i + 1;
                                                 }
                                               }
@@ -785,21 +788,28 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                             }
                                           }
                                         },
-                                        style: ElevatedButton.styleFrom(
-                                            primary: color_palette[
-                                                "text_color_dark"],
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(18.0),
-                                            )),
                                         child: Text(
                                           en_messages["add_step_label"],
                                           textScaleFactor: 1.0,
-                                          style: TextStyle(
-                                              color: color_palette["white"],fontSize: 23.85.h),
+                                          style: TextStyle(fontSize: 23.85.h),
+
                                         ),
+                                        style: ElevatedButton.styleFrom(
+                                            primary: color_palette[
+                                            "text_color_dark"],
+                                            onPrimary:
+                                            color_palette["white"],
+                                            elevation: 20,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                  18.0),
+                                            ),
+                                            textStyle: TextStyle(
+                                                fontSize: 18.55.h)),
                                       ),
                                     ),
+
                                   ],
                                 )))))
               ],
@@ -807,18 +817,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
           ),
         ));
   }
-  Future<Null> _cropImage() async {
-    Map<String, dynamic> output = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ImageCropper(imageFile: imageFile)));
-    imageFile = null;
-    if (output != null) {
-      if (output.containsKey("imageFile")) {
-        imageFile = output["imageFile"];
-      }
-    }
-  }
+
 
   void recipeProvided() {
     if (widget.recipe != null) {
@@ -954,15 +953,15 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
             orientation: Orientation.portrait);
         return MultiSelectBottomSheet(
           items: DietTypes.map((e) => MultiSelectItem(e, e)).toList(),
-          unselectedColor: color_palette["text_color_alt"],
+          unselectedColor:  lighten( Colors.lightBlueAccent,0.1),
           selectedColor: color_palette["text_color_dark"],
           itemsTextStyle: TextStyle(
-              color: color_palette["white"],
-              fontSize: 18.h
+              color: color_palette["text_color_dark"],
+              fontSize: 21.h
           ),
           selectedItemsTextStyle: TextStyle(
               color: color_palette["white"],
-              fontSize: 18.h
+              fontSize: 21.h
           ),
           listType: MultiSelectListType.CHIP,
           initialValue: activeDiets,
@@ -971,12 +970,12 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
               "  Diet Picker\n Choose up to 6",
               maxLines: 2,
               style: TextStyle(
-                  color: color_palette["text_color_alt"], fontSize: 26.85.h),
+                  color: color_palette["background_color"], fontSize: 26.85.h),
               textAlign: TextAlign.center,
             ),
           ),
-          cancelText: Text("Cancel",style: TextStyle(fontSize: 23.h,color: color_palette["text_color_alt"]),),
-          confirmText: Text("Ok",style: TextStyle(fontSize: 23.h,color: color_palette["text_color_alt"]),),
+          cancelText: Text("Cancel",style: TextStyle(fontSize: 23.h,color: color_palette["background_color"]),),
+          confirmText: Text("Ok",style: TextStyle(fontSize: 23.h,color: color_palette["background_color"]),),
           onConfirm: (values) {
             activeDiets = values;
             setState(() {});
@@ -1009,15 +1008,15 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
             orientation: Orientation.portrait);
         return MultiSelectBottomSheet(
           items: MEALTYPES.map((e) => MultiSelectItem(e, e)).toList(),
-          unselectedColor: color_palette["text_color_alt"],
+          unselectedColor:  lighten( Colors.lightBlueAccent,0.1),
           selectedColor: color_palette["text_color_dark"],
           itemsTextStyle: TextStyle(
-              color: color_palette["white"],
-              fontSize: 18.h
+              color: color_palette["background_color"],
+              fontSize: 21.h
           ),
           selectedItemsTextStyle: TextStyle(
               color: color_palette["white"],
-              fontSize: 18.h
+              fontSize: 21.h
           ),
           listType: MultiSelectListType.CHIP,
           initialValue: activeMeals,
@@ -1026,12 +1025,12 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
               "  Meal Picker\n Choose up to 3",
               maxLines: 2,
               style: TextStyle(
-                  color: color_palette["text_color_alt"], fontSize: 26.85.h),
+                  color: color_palette["background_color"], fontSize: 26.85.h),
               textAlign: TextAlign.center,
             ),
           ),
-          cancelText: Text("Cancel",style: TextStyle(fontSize: 23.h,color: color_palette["text_color_alt"]),),
-          confirmText: Text("Ok",style: TextStyle(fontSize: 23.h,color: color_palette["text_color_alt"]),),
+          cancelText: Text("Cancel",style: TextStyle(fontSize: 23.h,color: color_palette["background_color"]),),
+          confirmText: Text("Ok",style: TextStyle(fontSize: 23.h,color: color_palette["background_color"]),),
           onConfirm: (values) {
             activeMeals = values;
             setState(() {});

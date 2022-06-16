@@ -18,11 +18,11 @@ import 'package:provider/provider.dart';
 
 import '../../../constants/Themes.dart';
 
-class MealPlannerPopup extends StatefulWidget {
+class MealSharePopup extends StatefulWidget {
   @required
   final Recipe recipe;
   final bool isCopy;
-  const MealPlannerPopup({
+  const MealSharePopup({
     Key key,
     this.recipe, this.isCopy = false,
   }) : super(key: key);
@@ -30,7 +30,7 @@ class MealPlannerPopup extends StatefulWidget {
   _MealSharePopupState createState() => _MealSharePopupState();
 }
 
-class _MealSharePopupState extends State<MealPlannerPopup> {
+class _MealSharePopupState extends State<MealSharePopup> {
   static const String _MEALPLANPOPUP = "MEALPLAN_POPUP";
   DateTime selectDate;
   TextEditingController _timeController = TextEditingController();
@@ -110,10 +110,10 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
         ),
         margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         decoration: BoxDecoration(
-            color: color_palette["white"], borderRadius: BorderRadius.circular(20)),
+            color: color_palette["background_color"], borderRadius: BorderRadius.circular(20)),
         child: Material(
           elevation: 3,
-          color: Colors.grey[200],
+          color: color_palette["white"],
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Container(
@@ -125,14 +125,12 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
                   widget.isCopy ? "Copy Meal Plan To": "Add To Meal Plan",
                   style: TextStyle(
                       fontSize: 31.8.h,
-                      color: Colors.black,
-                      decoration: TextDecoration.underline),
+                      color:  color_palette["background_color"],
+                      ),
                 ),
+
                 Container(
-                  height: 10,
-                ),
-                Container(
-                  height: 86.125.h,
+                  height: 100.h,
                   margin: EdgeInsets.only(top: 15),
                   child: CalendarList(
                     dateRange: Conversion.getDaysInBetween(
@@ -183,10 +181,10 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0),
-                                        borderSide: BorderSide(color: color_palette["text_color_dark"],width: 2)),
+                                        borderSide: BorderSide(color:  color_palette["background_color"],width: 2)),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(8.0),
-                                        borderSide: BorderSide(color: color_palette["text_color_dark"],width: 2))),
+                                        borderSide: BorderSide(color:  color_palette["background_color"],width: 2))),
 
                           )),
                         ),
@@ -215,7 +213,7 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
                             textAlign: TextAlign.center,
                             readOnly: true,
                             style: TextStyle(
-                                color: color_palette["background_color"], fontSize: 53.h /2,height:1.5),
+                                color:  color_palette["background_color"], fontSize: 53.h /2,height:1.5),
                             decoration: InputDecoration(
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
@@ -224,12 +222,12 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
                               counterText: "",
                               focusedBorder: OutlineInputBorder(
                                 borderSide:  BorderSide(
-                                    color:color_palette["text_color_dark"], width: 2.0),
+                                    color: color_palette["background_color"], width: 2.0),
                                 borderRadius: BorderRadius.circular(5.0),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide:  BorderSide(
-                                    color: color_palette["text_color_dark"], width: 2.0),
+                                    color:  color_palette["background_color"], width: 2.0),
                                 borderRadius: BorderRadius.circular(5.0),
                               ),
                             ),
@@ -247,11 +245,11 @@ class _MealSharePopupState extends State<MealPlannerPopup> {
                       alignment: AlignmentDirectional.center,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
-                          color: Colors.black),
+                          color: Colors.transparent),
                       child: Text(
                         "Add",
                         style: TextStyle(
-                            color:color_palette["white"],
+                            color: color_palette["background_color"],
                             fontWeight: FontWeight.bold,
                             fontSize: 26.h),
                       ),

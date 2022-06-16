@@ -1,15 +1,24 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mybmr/models/AppUser.dart';
-import 'package:mybmr/services/Firebase_db.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants/Themes.dart';
 import '../../../constants/messages/en_messages.dart';
+
+import '../../../notifiers/EquipmentNotifier.dart';
+import '../../../notifiers/FavoritesNotifier.dart';
+import '../../../notifiers/IngredientNotifier.dart';
+import '../../../notifiers/MealPlanNotifier.dart';
+import '../../../notifiers/UserListNotifier.dart';
+import '../../../notifiers/UserNotifier.dart';
+import '../../../services/Firebase_db.dart';
 import '../../../services/toast.dart';
-import '../../../widgets/HeaderBar.dart';
 import '../../../widgets/ImageCropper.dart';
 
 class ProfileBuilder extends StatefulWidget {
@@ -20,6 +29,9 @@ class ProfileBuilder extends StatefulWidget {
 class _ProfileBuilderState extends State<ProfileBuilder> {
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _aboutMeController = TextEditingController();
+  TextEditingController _businessUrlController = TextEditingController();
+  TextEditingController _youtubeUrlController = TextEditingController();
+  TextEditingController _tiktokUrlController = TextEditingController();
   File imageFile;
   ImagePicker _picker;
   @override
@@ -32,21 +44,6 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
     super.initState();
   }
 
-  Future<Null> _cropImage() async {
-    Map<String, dynamic> output = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ImageCropper(
-                  imageFile: imageFile,
-                  aspectRatio: 1.0,
-                )));
-    imageFile = null;
-    if (output != null) {
-      if (output.containsKey("imageFile")) {
-        imageFile = output["imageFile"];
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,58 +57,59 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
         orientation: Orientation.portrait);
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      appBar:    AppBar(
+
+
+        backgroundColor:  color_palette["background_color"] ,
+
+        title: Text( "My Account",style: TextStyle(
+            fontSize: 34.45.h,
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+        ),),
+        actions: [
+          IconButton(
+            icon: Icon(MaterialIcons.send,),
+            onPressed: ()async {
+              String username = _usernameController.value.text.trim();
+              String aboutMe = _aboutMeController.value.text.trim();
+              bool isAvailable = true;
+              if( username.length <= 2)         CustomToast("Username is to short!");
+              else if (username != AppUser.instance.userName ) {
+                isAvailable =
+                await FirebaseDB.isUsernameAvailable(username);
+              }
+              if (isAvailable) {
+                String imagePath = await FirebaseDB.updateUserProfile(
+                    userId: AppUser.instance.uuid,
+                    username: username,
+                    aboutMe: aboutMe,
+                    profileImage: imageFile);
+                AppUser.instance.profileImagePath = imagePath;
+                AppUser.instance.userName = username;
+                AppUser.instance.aboutUser = aboutMe;
+                Navigator.pop(context);
+              } else {
+
+                CustomToast("Username already taken!");
+              }
+            },
+          ),
+        ],
+
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor:  color_palette["background_color"],
+        ),
+
+      ),
+
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-            gradient: color_palette["gradient"]
-        ),
-
+        color: color_palette["background_color"],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            HeaderBar(
-              popWidget: Icon(
-                Icons.arrow_back,
-                color: color_palette["white"],
-                size: 31.8.h,
-              ),
-              onPopCallback: (){
-
-              },
-              title: "Profile Builder",
-
-              submitWidget: Text(
-                "Save",
-                textScaleFactor: 1.0,
-                style: TextStyle(color: color_palette["white"], fontSize: 20.h),
-
-              ),
-              submitColor: color_palette["text_color_dark"],
-              submitCallback: () async {
-                String username = _usernameController.value.text.trim();
-                String aboutMe = _aboutMeController.value.text.trim();
-                bool isAvailable = true;
-                if (username != AppUser.instance.userName) {
-                  isAvailable =
-                      await FirebaseDB.isUsernameAvailable(username);
-                }
-                if (isAvailable) {
-                  String imagePath = await FirebaseDB.updateUserProfile(
-                      userId: AppUser.instance.uuid,
-                      username: username,
-                      aboutMe: aboutMe,
-                      profileImage: imageFile);
-                  AppUser.instance.profileImagePath = imagePath;
-                  AppUser.instance.userName = username;
-                  AppUser.instance.aboutUser = aboutMe;
-                  Navigator.pop(context);
-                } else {
-                  CustomToast("Username already taken!");
-                }
-              },
-            ),
-
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15),
@@ -126,8 +124,8 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                                 maxHeight: 1024,
                                 maxWidth: 1024);
                             if (pickedFile != null) {
-                              imageFile = File(pickedFile.path);
-                              await _cropImage();
+                              imageFile = await MyImageCropper.cropImage(File(pickedFile.path));
+
                               setState(() {});
                             }
                           } catch (_) {}
@@ -246,11 +244,14 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                               child: TextField(
                                 controller: _aboutMeController,
                                 style: TextStyle(
+
                                     color: color_palette["white"], fontSize: 23.85.h),
                                 maxLines: null,
                                 autofocus: false,
                                 textInputAction: TextInputAction.done,
                                 decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 30.h/2,horizontal: 15.h),
+
                                     filled: true,
                                     fillColor: Colors.black54,
                                     hintText:
@@ -266,6 +267,185 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                                             BorderSide(color: color_palette["white"]))),
                               ))
                         ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 15,
+                          ),
+                          Text(
+                            "Business URL",
+                            textScaleFactor: 1.0,
+                            style: TextStyle(
+                                color: color_palette["white"],
+                                fontSize: 23.85.h,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Container(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10),
+                              child: TextField(
+                                controller: _businessUrlController,
+                                style: TextStyle(
+                                    color: color_palette["white"], fontSize: 23.85.h),
+                                maxLines: null,
+                                autofocus: false,
+                                textInputAction: TextInputAction.done,
+                                decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 30.h/2,horizontal: 15.h),
+
+                                    filled: true,
+                                    fillColor: Colors.black54,
+                                    hintText:
+                                    "https://www.myfoodtruck.com/",
+                                    hintStyle: TextStyle(
+                                      color: color_palette["white"],
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide:
+                                        BorderSide(color: color_palette["white"])),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide:
+                                        BorderSide(color: color_palette["white"]))),
+                              ))
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 15,
+                          ),
+                          Text(
+                            "Youtube Channel",
+                            textScaleFactor: 1.0,
+                            style: TextStyle(
+                                color: color_palette["white"],
+                                fontSize: 23.85.h,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Container(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10),
+                              child: TextField(
+                                controller: _youtubeUrlController,
+                                style: TextStyle(
+                                    color: color_palette["white"], fontSize: 23.85.h),
+                                maxLines: null,
+                                autofocus: false,
+                                textInputAction: TextInputAction.done,
+                                decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 30.h/2,horizontal: 15.h),
+
+                                    filled: true,
+                                    fillColor: Colors.black54,
+                                    hintText:
+                                    "https://www.youtube.com/watch?v=",
+                                    hintStyle: TextStyle(
+                                      color: color_palette["white"],
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide:
+                                        BorderSide(color: color_palette["white"])),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide:
+                                        BorderSide(color: color_palette["white"]))),
+                              ))
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 15,
+                          ),
+                          Text(
+                            "Tiktok Page",
+                            textScaleFactor: 1.0,
+                            style: TextStyle(
+                                color: color_palette["white"],
+                                fontSize: 23.85.h,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Container(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10),
+                              child: TextField(
+                                controller: _tiktokUrlController,
+                                style: TextStyle(
+                                    color: color_palette["white"], fontSize: 23.85.h),
+                                maxLines: null,
+                                autofocus: false,
+                                textInputAction: TextInputAction.done,
+                                decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 30.h/2,horizontal: 15.h),
+
+                                    filled: true,
+                                    fillColor: Colors.black54,
+                                    hintText:
+                                    "https://vm.tiktok.com/",
+                                    hintStyle: TextStyle(
+                                      color: color_palette["white"],
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide:
+                                        BorderSide(color: color_palette["white"])),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide:
+                                        BorderSide(color: color_palette["white"]))),
+                              ))
+                        ],
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 30),
+                        height:59.625.h,
+                        width: double.infinity,
+
+                        child: ElevatedButton(
+                            onPressed: () {
+                              AppUser.instance.uuid = "";
+                              Provider.of<EquipmentNotifier>(context,
+                                  listen: false)
+                                  .clear();
+                              Provider.of<IngredientNotifier>(context,
+                                  listen: false)
+                                  .clear();
+                              Provider.of<FavoritesNotifier>(context,
+                                  listen: false)
+                                  .clear();
+                              Provider.of<MealPlanNotifier>(context,
+                                  listen: false)
+                                  .clear();
+                              Provider.of<UserListNotifier>(context,
+                                  listen: false)
+                                  .clear();
+                              Provider.of<UserNotifier>(context,
+                                  listen: false)
+                                  .logout();
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+
+                                primary: color_palette["white"],
+                                onPrimary: color_palette["background_color"],
+                                shape: ContinuousRectangleBorder(),
+                                alignment:
+                                AlignmentDirectional.centerStart),
+                            child:
+                            Text(
+                              " Logout",
+                              style: TextStyle(
+                                fontSize: 23.85.h,
+                              ),
+                            )
+                        ),
                       ),
                     ],
                   ),

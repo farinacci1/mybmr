@@ -4,7 +4,7 @@ Map<String, dynamic> color_palette = {
   "background_color": Color(0xFF121212),
   "text_color_alt": Color(0xFFe48400),
   "text_color_dark": Color(0xFF430051),
-  "white": Color(0XFFF5F5F5),
+  "white": Color(0xFFFFFDFA),
   "overlay": Color(0xBB444444),
   "tone": Color(0x22555555),
   "neutral": Colors.greenAccent,

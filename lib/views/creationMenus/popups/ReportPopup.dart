@@ -23,8 +23,7 @@ class _ReportPopupState extends State<ReportPopup> {
   static const String _REPORTPOPUP = "REPORT_POPUP";
 
   void reportRecipe(String recipeId, int flagType) {
-    if (AppUser.instance.uuid != null &&
-        AppUser.instance.uuid != "" &&
+    if ( AppUser.instance.isUserSignedIn() &&
         !AppUser.instance.reportedRecipesIds.contains(recipeId)) {
       FirebaseDB.updateRecipeFlags(recipeId, flagType,
               flaggersId: AppUser.instance.uuid)
@@ -56,28 +55,25 @@ class _ReportPopupState extends State<ReportPopup> {
               return CustomRectTween(begin: begin, end: end);
             },
             child: Container(
-              width: min(MediaQuery.of(context).size.width - 20, 344.5.h),
+              width: min(MediaQuery.of(context).size.width - 20, 365.h),
               child: Material(
                 elevation: 3,
-                color: color_palette["white"],
+
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        Color(0xffd2ccc4),
-                        Color(0xff04619f),
-                        Color(0xff380036),
-                        Color(0xff380036),
-                        Color(0xff380036),
-                        Color(0xff380036),
-                      ],
-                    ),
+                    color: color_palette["background_color"],
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 2,
+                          spreadRadius: 2
+
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -99,7 +95,7 @@ class _ReportPopupState extends State<ReportPopup> {
                           decoration: BoxDecoration(
                               color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
-                          margin: EdgeInsets.only(top: 5),
+                          margin: EdgeInsets.fromLTRB(10,5,10,0),
                           child: ElevatedButton(
                             onPressed: () {
                               if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
@@ -121,7 +117,7 @@ class _ReportPopupState extends State<ReportPopup> {
                           decoration: BoxDecoration(
                               color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
-                          margin: EdgeInsets.only(top: 5),
+                          margin: EdgeInsets.fromLTRB(10,5,10,0),
                           child: ElevatedButton(
                             onPressed: () {
                               if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
@@ -141,7 +137,7 @@ class _ReportPopupState extends State<ReportPopup> {
                           decoration: BoxDecoration(
                               color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
-                          margin: EdgeInsets.only(top: 5),
+                          margin: EdgeInsets.fromLTRB(10,5,10,0),
                           child: ElevatedButton(
                             onPressed: () {
                               if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")
@@ -162,7 +158,7 @@ class _ReportPopupState extends State<ReportPopup> {
                           decoration: BoxDecoration(
                               color: color_palette["overlay"],
                               borderRadius: BorderRadius.circular(5)),
-                          margin: EdgeInsets.only(top: 5,bottom: 10),
+                          margin: EdgeInsets.fromLTRB(10,5,10,10),
                           child: ElevatedButton(
                             onPressed: () {
                               if(AppUser.instance.uuid !=null && AppUser.instance.uuid != "")

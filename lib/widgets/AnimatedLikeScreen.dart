@@ -29,6 +29,7 @@ class AnimatedLikeScreen extends StatefulWidget {
       this.padding,
       this.isAnimating,
       this.onEnd,
+        this.shouldDisappear = false,
       this.icon,
       this.iconColor})
       : bubblesSize = bubblesSize ?? size * 2.0,
@@ -41,7 +42,7 @@ class AnimatedLikeScreen extends StatefulWidget {
   final bool hasScaleFactor;
   ///icon Color
   final Color iconColor;
-
+  final shouldDisappear;
   ///animation duration to change isLiked state
   final Duration animationDuration;
 

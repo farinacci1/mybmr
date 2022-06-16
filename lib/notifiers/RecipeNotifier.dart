@@ -5,27 +5,31 @@ import 'package:mybmr/models/AppUser.dart';
 import 'package:mybmr/models/Recipe.dart';
 import 'package:mybmr/services/Firebase_db.dart';
 
-enum RecipeSortBy{
-  TITLE,
-  CUISINE,
-  DIETS,
-  NEW
-}
+import '../services/helper.dart';
+
+
 class RecipeNotifier extends ChangeNotifier {
 
   int _batchSize = 5;
-  RecipeSortBy _sortedBy = RecipeSortBy.NEW;
-  bool isFetching = false;
-  int currPage = 0;
-  DocumentSnapshot _lastDoc;
   String _title = "";
   String _cuisine;
   String _diet;
   double _calories = 4000;
+
+  //Discover Recipe
+  RecipeSortBy _sortedBy = RecipeSortBy.NEW;
+  int currPage = 0;
+  bool isFetching = false;
+  DocumentSnapshot _lastDoc;
   bool _canFetchRecipes = true;
   List<Recipe> _recipes = [];
+
+
+
+
   Map<String,AppUser> posters = {};
   List<Recipe> get recipes => this._recipes;
+
 
   int get batchSize => this._batchSize;
   bool get canFetchRecipes => this._canFetchRecipes;
@@ -70,7 +74,11 @@ class RecipeNotifier extends ChangeNotifier {
             for(QueryDocumentSnapshot queryDocumentSnapshot in querySnapshot.docs){
               Recipe newRecipe = Recipe.fromJson(recipeRecords: queryDocumentSnapshot.data(),recipeId: queryDocumentSnapshot.id);
               _recipes.add(newRecipe);
+
               await fetchOwner(newRecipe.createdBy);
+              if(  AppUser.instance.isUserSignedIn() && newRecipe.likedBy.contains(AppUser.instance.uuid)){
+                AppUser.instance.addLikeRecipe(newRecipe.id);
+              }
 
             }
             _lastDoc = querySnapshot.docs.last;
@@ -88,7 +96,12 @@ class RecipeNotifier extends ChangeNotifier {
             for(QueryDocumentSnapshot queryDocumentSnapshot in querySnapshot.docs){
               Recipe newRecipe = Recipe.fromJson(recipeRecords: queryDocumentSnapshot.data(),recipeId: queryDocumentSnapshot.id);
               _recipes.add(newRecipe);
+
+
               await fetchOwner(newRecipe.createdBy);
+              if(  AppUser.instance.isUserSignedIn() && newRecipe.likedBy.contains(AppUser.instance.uuid)){
+                AppUser.instance.addLikeRecipe(newRecipe.id);
+              }
             }
             _lastDoc = querySnapshot.docs.last;
           }
@@ -106,8 +119,12 @@ class RecipeNotifier extends ChangeNotifier {
               Recipe newRecipe = Recipe.fromJson(recipeRecords: queryDocumentSnapshot.data(),recipeId: queryDocumentSnapshot.id);
               _recipes.add(newRecipe);
               await fetchOwner(newRecipe.createdBy);
+              if(  AppUser.instance.isUserSignedIn() && newRecipe.likedBy.contains(AppUser.instance.uuid)){
+                AppUser.instance.addLikeRecipe(newRecipe.id);
+              }
             }
             _lastDoc = querySnapshot.docs.last;
+
           }
           if(querySnapshot.docs.length < _batchSize) _canFetchRecipes = false;
 
@@ -123,6 +140,9 @@ class RecipeNotifier extends ChangeNotifier {
               Recipe newRecipe = Recipe.fromJson(recipeRecords: queryDocumentSnapshot.data(),recipeId: queryDocumentSnapshot.id);
               _recipes.add(newRecipe);
               await fetchOwner(newRecipe.createdBy);
+              if(  AppUser.instance.isUserSignedIn() && newRecipe.likedBy.contains(AppUser.instance.uuid)){
+                AppUser.instance.addLikeRecipe(newRecipe.id);
+              }
             }
             _lastDoc = querySnapshot.docs.last;
           }

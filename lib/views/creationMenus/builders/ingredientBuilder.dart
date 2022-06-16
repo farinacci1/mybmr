@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,7 +20,7 @@ import 'package:mybmr/widgets/ExpandedSection.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/Themes.dart';
-import '../../../widgets/HeaderBar.dart';
+
 
 class IngredientBuilder extends StatefulWidget {
   final Ingredient ingredient;
@@ -85,70 +86,74 @@ class _IngredientBuilderState extends State<IngredientBuilder> {
         orientation: Orientation.portrait);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.black,
+      backgroundColor: color_palette["background_color"],
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor:  color_palette["background_color"],
+        ),
+        backgroundColor:  color_palette["background_color"],
+        title: Text( widget.shouldBuild
+            ? "Ingredient Builder"
+            : "Ingredient Selector",style: TextStyle(
+            fontSize: 34.45.h,
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+        ),),
+
+        actions: [
+          IconButton(
+            icon: Icon( widget.shouldBuild? MaterialIcons.send : MaterialIcons.check),
+            onPressed: ()
+            {
+            if (widget.shouldBuild) {
+            String title = _controller.value.text;
+            title = title.trim();
+            title = title.replaceAll(RegExp('\\s+'), " ");
+            if (title.length > 0 && _nutritionInfo.servingSize > 0.0) {
+            Ingredient ingredient;
+            if (imageFile != null) {
+            ingredient = new Ingredient(
+            ingredientName: title,
+            nutritionData: _nutritionInfo,
+            ingredientImage: imageFile);
+            createIngredient(ingredient);
+            } else {
+            CustomToast(en_messages["ingredient_missing_image"]);
+            }
+            } else {
+            if (title.length == 0)
+            CustomToast(en_messages["ingredient_missing_title"]);
+            else if (_nutritionInfo.servingSize <= 0.0)
+            CustomToast(
+            en_messages["ingredient_invalid_serving_size"]);
+            }
+            } else {
+            if (!widget.inShopping) {
+            Provider.of<IngredientNotifier>(context, listen: false)
+                .addIngredientToRecipe(widget.ingredient);
+            Navigator.pop(context, {"inUse": true});
+            } else {
+            Navigator.pop(context,
+            {"inUse": true, "ingredient": widget.ingredient});
+            }
+            }
+
+
+            },
+          ),
+        ],
+      ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-            gradient: color_palette["gradient"]
-        ),
+
         child: Container(
             decoration: BoxDecoration(
               color: color_palette["tone"],
             ),
             child:Column(
           children: [
-            HeaderBar(
-              popWidget: Icon(
-                Icons.arrow_back,
-                color: color_palette["white"],
-                size: 31.8.h,
-              ),
-              onPopCallback: () {},
-              title: widget.shouldBuild
-                  ? "Ingredient Builder"
-                  : "Ingredient Selector",
-              submitColor: color_palette["text_color_dark"],
-              submitWidget: Text(
-                widget.shouldBuild ? "Save" : "Use",
-                textScaleFactor: 1.0,
-                style: TextStyle(color: color_palette["white"], fontSize: 20.h),
-              ),
-              submitCallback: () {
-                if (widget.shouldBuild) {
-                  String title = _controller.value.text;
-                  title = title.trim();
-                  title = title.replaceAll(RegExp('\\s+'), " ");
-                  if (title.length > 0 && _nutritionInfo.servingSize > 0.0) {
-                    Ingredient ingredient;
-                    if (imageFile != null) {
-                      ingredient = new Ingredient(
-                          ingredientName: title,
-                          nutritionData: _nutritionInfo,
-                          ingredientImage: imageFile);
-                      createIngredient(ingredient);
-                    } else {
-                      CustomToast(en_messages["ingredient_missing_image"]);
-                    }
-                  } else {
-                    if (title.length == 0)
-                      CustomToast(en_messages["ingredient_missing_title"]);
-                    else if (_nutritionInfo.servingSize <= 0.0)
-                      CustomToast(
-                          en_messages["ingredient_invalid_serving_size"]);
-                  }
-                } else {
-                  if (!widget.inShopping) {
-                    Provider.of<IngredientNotifier>(context, listen: false)
-                        .addIngredientToRecipe(widget.ingredient);
-                    Navigator.pop(context, {"inUse": true});
-                  } else {
-                    Navigator.pop(context,
-                        {"inUse": true, "ingredient": widget.ingredient});
-                  }
-                }
-              },
-            ),
+
             Expanded(
               child: NotificationListener<OverscrollIndicatorNotification>(
                   onNotification: (overscroll) {

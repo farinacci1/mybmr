@@ -123,7 +123,7 @@ class _SelectedIngredientState extends State<SelectedIngredient> {
                   },
                   child: Icon(
                     Icons.edit,
-                    color: color_palette["text_color_dark"],
+                    color: color_palette["white"],
                     size: 18,
                   ),
                 )

@@ -93,7 +93,7 @@ class _EquipmentPopupState extends State<EquipmentPopup> {
         return CustomRectTween(begin: begin, end: end);
       },
           child: Container(
-              width: 344.5.h,
+              width: 380.h,
           margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Material(
               elevation: 3,
@@ -102,158 +102,137 @@ class _EquipmentPopupState extends State<EquipmentPopup> {
                   borderRadius: BorderRadius.circular(20)),
 
                   child: Container(
-                    padding: EdgeInsets.fromLTRB(15,35,15,5),
-                      child:Stack(
-                      clipBehavior: Clip.none,
-                      alignment: AlignmentDirectional.topCenter,
+                    padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+                      child:SingleChildScrollView(child:Column(
+                        mainAxisSize: MainAxisSize.min,
+
                       children: [
-                        Container(
-                            width: 291.5.h,
-                            padding: EdgeInsets.symmetric(vertical: 25),
-                            decoration: BoxDecoration(
-                                border: Border(
-                              top: BorderSide(color: color_palette["background_color"]),
-                            )),
-                            child:SingleChildScrollView(child:  Column(
-                              mainAxisSize: MainAxisSize.min,
-                                children: [
-                              TextField(
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(18),
-                                ],
-                                enabled: widget.equipment == null,
-                                controller: _controller,
-                                style: TextStyle(),
-                                decoration: InputDecoration(
+                        Text(
+                          widget.equipment == null ? "  Equipment Maker  " : "  Equipment Selector  ",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 34.h,
+                            color: color_palette["overlay"],
+                          ),
+                        ),
+                        TextField(
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(18),
+                          ],
+                          enabled: widget.equipment == null,
+                          controller: _controller,
+                          style: TextStyle(),
+                          decoration: InputDecoration(
 
-                                    labelText: "Equipment Name"),
-                              ),
-                              Padding(padding: EdgeInsets.only(top: 10)),
-                              GestureDetector(
-                                onTap: () async {
-                                  if( widget.equipment == null){
-                                    print("Request for image");
-                                    XFile pickedFile = await _picker.pickImage(
-                                        source: ImageSource.gallery,
-                                        maxHeight: 1024,
-                                        maxWidth: 1024);
-                                    if (pickedFile != null) {
-                                      imageFile = File(pickedFile.path);
-                                      setState(() {});
-                                    }
-                                  }
+                              labelText: "Equipment Name"),
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 10)),
+                        GestureDetector(
+                          onTap: () async {
+                            if( widget.equipment == null){
+                              print("Request for image");
+                              XFile pickedFile = await _picker.pickImage(
+                                  source: ImageSource.gallery,
+                                  maxHeight: 1024,
+                                  maxWidth: 1024);
+                              if (pickedFile != null) {
+                                imageFile = File(pickedFile.path);
+                                setState(() {});
+                              }
+                            }
 
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.only(top: 20),
-                                  height: 132.5.h,
-                                  width: double.infinity,
-                                  color: color_palette["overlay"],
-                                  child: imageFile != null
-                                      ? Image.file(
-                                    imageFile,
-                                    fit: BoxFit.cover,
-                                  ): equipmentImageFromDb != null ? 
-                                      Image.network(equipmentImageFromDb,
-                                        fit: BoxFit.cover,)
-                                      :Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                              Icon(
-                                                Icons.add_a_photo,
-                                                size: 47.7.h,
-                                                color: color_palette["white"],
-                                              ),
-                                              Container(
-                                                height: 2.65.h,
-                                              ),
-                                              Text(
-                                                "Add a photo",
-                                                style: TextStyle(
-                                                    color: color_palette["white"],
-                                                    fontSize: 21.2.h),
-                                              )
-                                            ])
-
-
-                                ),
-                              ),
-                              Padding(padding: EdgeInsets.only(top: 10)),
-                              Container(
-                                height: 30,
-                                margin: EdgeInsets.only(top: 10),
-                                child: widget.equipment == null ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                          },
+                          child: Container(
+                              margin: EdgeInsets.only(top: 20),
+                              height: 160.h,
+                              width: double.infinity,
+                              color: color_palette["overlay"],
+                              child: imageFile != null
+                                  ? Image.file(
+                                imageFile,
+                                fit: BoxFit.cover,
+                              ): equipmentImageFromDb != null ?
+                              Image.network(equipmentImageFromDb,
+                                fit: BoxFit.cover,)
+                                  :Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.center,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.center,
                                   children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        String name = _controller.value.text;
-                                        name = name.trim();
-                                        if (name.length == 0) {
-                                          CustomToast(en_messages["equipment_missing_title"]);
-                                        } else {
-                                          createEquipment(name);
-                                        }
-                                      },
-                                      child: Text("Ok"),
-                                      style: ElevatedButton.styleFrom(
-                                          primary: Colors.black),
+                                    Icon(
+                                      Icons.add_a_photo,
+                                      size: 47.7.h,
+                                      color: color_palette["white"],
                                     ),
                                     Container(
-                                      width: 8,
+                                      height: 2.65.h,
                                     ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pop(context,{"create":false});
-                                      },
-                                      child: Text("Cancel"),
-                                      style: ElevatedButton.styleFrom(
-                                          primary: Colors.black),
+                                    Text(
+                                      "Add a photo",
+                                      style: TextStyle(
+                                          color: color_palette["white"],
+                                          fontSize: 21.2.h),
                                     )
-                                  ],
-                                )
-                                : Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
+                                  ])
 
-                                        if(!widget.inShopping){
-                                          Provider.of<EquipmentNotifier>(context,listen: false).addEquipmentToRecipe(widget.equipment);
-                                          Provider.of<EquipmentNotifier>(context,listen: false).optionSelected = true;
-                                          Navigator.pop(context, {"use": true});
-                                        }else{
-                                          Navigator.pop(context, {"use": true, "equipment" :widget.equipment});
-                                        }
 
-                                      },
-                                      child: Text("Use"),
-                                      style: ElevatedButton.styleFrom(
-                                          primary: Colors.black),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ]))),
-                        Positioned(
-                            top: -27,
-                            child: Text(
-                              widget.equipment == null ? "  Equipment\n Maker  " : "  Equipment\n Selector  ",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 24,
-                                height: 1.1,
-                                backgroundColor: color_palette["white"],
-                                color: color_palette["overlay"],
-                              ),
-                            ))
-                      ])))),
+                          ),
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 10)),
+                        Container(
+                            padding:
+                            EdgeInsets.only(top: 10, ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(
+                                    child: Container(
+
+                                        child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context,{"create":false});
+                                            },
+                                            child: Container(
+                                                height: 53.h,
+                                                child: Text(
+                                                  "Cancel",
+
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 28.h,
+                                                      color: color_palette[
+                                                      "background_color"]),
+                                                ))))),
+                                Expanded(
+                                    child: Container(
+                                        child: GestureDetector(
+                                            onTap: () {
+                                              String name = _controller.value.text;
+                                              name = name.trim();
+                                              if (name.length == 0) {
+                                                CustomToast(en_messages["equipment_missing_title"]);
+                                              } else {
+                                                createEquipment(name);
+                                              }
+                                            },
+                                            child: Container(
+                                                height: 53.h,
+                                                child: Text(
+                                                  "Submit",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 28.h,
+                                                      color: color_palette[
+                                                      "background_color"]),
+                                                ))))),
+
+                              ],
+                            )),
+
+
+                      ]))))),
     ));
   }
 }

@@ -14,9 +14,14 @@ import 'package:mybmr/widgets/CustomDatePicker/CalendarTimeline.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/Themes.dart';
-import 'creationMenus/popups/MealPlanner.dart';
+import 'creationMenus/popups/MealSharePopup.dart';
+class MealPlannerDisplay extends StatefulWidget{
 
-class MealPlannerDisplay extends StatelessWidget {
+  @override _MealPlannerDisplayState createState() => _MealPlannerDisplayState();
+}
+
+class _MealPlannerDisplayState extends State<MealPlannerDisplay> {
+
   @override
   Widget build(BuildContext context) {
     MealPlanNotifier mealPlanNotifier =
@@ -105,7 +110,7 @@ class MealPlannerDisplay extends StatelessWidget {
                                       .setStartOfDay(date);
                                 },
                                 leftMargin: 20,
-                                monthColor: Colors.white70,
+                                monthColor: color_palette["offWhite"],
                                 dayColor: color_palette["white"],
                                 dayNameColor: color_palette["text_color_dark"],
                                 activeDayColor:
@@ -131,10 +136,11 @@ class MealPlannerDisplay extends StatelessWidget {
                       child: Expanded(
                           child: Container(
                               child: ListView.builder(
-                                  itemCount: dailyPlans.length,
-                                  itemBuilder: (context, index) {
+
+                                  itemCount:dailyPlans.length,
+                                  itemBuilder: (BuildContext ctx, index) {
                                     MealPlanNotifier mealPlanNotifier =
-                                        Provider.of<MealPlanNotifier>(context,
+                                        Provider.of<MealPlanNotifier>(ctx,
                                             listen: false);
 
                                     MealPlan mealPlan = dailyPlans[index];
@@ -155,6 +161,7 @@ class MealPlannerDisplay extends StatelessWidget {
 
                                       return mealCard(
                                           context, mealPlan, recipe, index);
+
                                     } else {
                                       return Container();
                                     }
@@ -164,7 +171,7 @@ class MealPlannerDisplay extends StatelessWidget {
                       en_messages["no_meals_found"],
                       maxLines: 3,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 23.h),
+                      style: TextStyle(color: color_palette["white"], fontSize: 23.h),
                     )),
               Spacer(),
               totalCaloriesWidget(context),
@@ -265,7 +272,7 @@ class MealPlannerDisplay extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color_palette["text_color_dark"],
                   gradient: color_palette["gradient"],
-                  borderRadius: BorderRadius.circular(70.h / 2),
+                  borderRadius: BorderRadius.circular(40.h / 2),
                   boxShadow: [
                     BoxShadow(
                       color: color_palette["overlay"],
@@ -287,8 +294,8 @@ class MealPlannerDisplay extends StatelessWidget {
                           margin: EdgeInsets.only(left: 10, right: 5),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.horizontal(
-                                left: Radius.circular(70.h / 2),
-                                right: Radius.circular(70.h / 2),
+                                left: Radius.circular(53.h / 2),
+                                right: Radius.circular(53.h / 2),
                               ),
                               image: DecorationImage(
                                   image:
@@ -310,7 +317,7 @@ class MealPlannerDisplay extends StatelessWidget {
                                     minFontSize: 12,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 21.2.h),
+                                        color: color_palette["white"], fontSize: 21.2.h),
                                   ),
                                   AutoSizeText(
                                     mealPlan.title.toUpperCase(),
@@ -318,7 +325,7 @@ class MealPlannerDisplay extends StatelessWidget {
                                     maxLines: 1,
                                     minFontSize: 8,
                                     style: TextStyle(
-                                        color: Colors.greenAccent,
+                                        color: color_palette["white"],
                                         fontSize: 15.9.h),
                                   ),
                                 ],
@@ -345,7 +352,7 @@ class MealPlannerDisplay extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 minFontSize: 8,
                                 style: TextStyle(
-                                    color: Colors.greenAccent,
+                                    color:color_palette["neutral"],
                                     fontSize: 13.25.h),
                               ),
                             ],
@@ -354,7 +361,7 @@ class MealPlannerDisplay extends StatelessWidget {
                         onTap: () async {
                           await Navigator.of(context)
                               .push(HeroDialogRoute(builder: (context) {
-                            return MealPlannerPopup(
+                            return MealSharePopup(
                               recipe: recipe,
                               isCopy: true,
                             );
@@ -371,7 +378,7 @@ class MealPlannerDisplay extends StatelessWidget {
                               )),
                           child: Icon(
                             Icons.copy,
-                            color: Colors.white,
+                            color: color_palette["white"],
                             size: 14,
                           ),
                         ),

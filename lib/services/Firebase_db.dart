@@ -3,9 +3,10 @@ import 'dart:typed_data';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:mybmr/models/AppUser.dart';
+import 'package:mybmr/models/Event.dart';
 import 'package:mybmr/models/MealPlan.dart';
 import 'package:mybmr/models/ShoppingList.dart';
-import 'package:mybmr/models/UserNote.dart';
+
 import 'package:mybmr/services/conversion.dart';
 import 'package:path/path.dart';
 
@@ -15,7 +16,7 @@ import 'package:mybmr/models/Equipment.dart';
 import 'package:mybmr/models/Ingredient.dart';
 import 'package:mybmr/models/Recipe.dart';
 
-import '../models/Task.dart';
+import '../models/TaskList.dart';
 
 class FirebaseDB {
   /*
@@ -28,16 +29,17 @@ class FirebaseDB {
     DocumentSnapshot ds = await users.doc(uid).get();
     if(!ds.exists){
       await users.doc(uid).set({
-        "myCreationIds" :[],
-        "mealPlanIds" : [],
         "likedRecipesIds": [],
         "reportedRecipesIds":[],
         "myFriends" : [],
         "userName": uid,
         "profileImage":null,
         "aboutUser" : "",
+        "webLink" : "",
         "following" : [],
-        "followedBy" : 0
+        "followedBy" : 0,
+        "numCreated": 0,
+        "numLiked" : 0
 
       });
       await FirebaseFirestore.instance.collection('Aggregate').doc('Stats').collection('Users').doc('stats').update({
@@ -58,18 +60,30 @@ class FirebaseDB {
 
   static Future<void> _addToCreations(String recipeId,String userId) async {
     await FirebaseFirestore.instance.collection('Users').doc(userId).update({
-      "myCreationIds" : FieldValue.arrayUnion([recipeId])
+      "numCreated" : FieldValue.increment(1)
     });
   }
   static Future<void> likeRecipe(String recipeId,String userId) async {
-    await FirebaseFirestore.instance.collection('Users').doc(userId).update({
-      "likedRecipesIds" : FieldValue.arrayUnion([recipeId])
+    await FirebaseFirestore.instance.collection('Recipes').doc(recipeId).update({
+      "likedBy" : FieldValue.arrayUnion([userId]),
+      "numLikes" : FieldValue.increment(1)
     });
+    await FirebaseFirestore.instance.collection('Users').doc(userId).update(
+        {
+          "numLiked" :FieldValue.increment(1)
+        });
   }
   static Future<void> unlikeRecipe(String recipeId,String userId) async {
-    await FirebaseFirestore.instance.collection('Users').doc(userId).update({
-      "likedRecipesIds" : FieldValue.arrayRemove([recipeId])
+    FirebaseFirestore.instance.collection('Recipes').doc(recipeId).update({
+      "numLikes" : FieldValue.increment(-1),
+      "likedBy" : FieldValue.arrayRemove([userId])
     });
+    await FirebaseFirestore.instance.collection('Users').doc(userId).update(
+        {
+          "numLiked" :FieldValue.increment(-1)
+        });
+
+
   }
 
 
@@ -118,11 +132,15 @@ class FirebaseDB {
       "createdBy": creatorsId,
       "caloriesPerServ" : recipeMap["totalCalories"] / recipeMap["peopleServed"],
       "updatedOn" : createdOn,
-      "numLikes" : 0
+      "numLikes" : 0,
+      "likedBy":[],
 
     });
     DocumentReference ref = await recipes.add(recipeMap);
-
+    await FirebaseFirestore.instance.collection('Users').doc(creatorsId).update(
+        {
+          "numCreated" :FieldValue.increment(1)
+        });
 
     await FirebaseFirestore.instance.collection('Aggregate').doc('Stats').collection('Recipes').doc('stats').update({
       "count" : FieldValue.increment(1)
@@ -136,78 +154,10 @@ class FirebaseDB {
     }
     return ref.id;
   }
-  static Future<String> insertShoppingList( ShoppingList shoppingList,{String creatorsId}) async{
-    Map<String,dynamic> map =shoppingList.toJSON();
-    map.addAll({
-      "createdOn": DateTime.now().millisecondsSinceEpoch,
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
-      "createdBy": creatorsId
-    });
-    DocumentReference ref =await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").add(map);
-    DocumentSnapshot orderSnapshot = await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").get();
-    if(orderSnapshot.exists){
-      FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").update(
-          {
-            "priorityOrder" : FieldValue.arrayUnion([ref.id]) // priority order if a reversed list
-          });
-    }else{
-      FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").set(
-          {
-            "priorityOrder" : [ref.id] // priority order if a reversed list
-          });
-    }
 
-    return ref.id;
-  }
-  static Future<String> insertUserTask( UserTask task,{String creatorsId}) async{
-    Map<String,dynamic> map =task.toJSON();
-    map.addAll({
-      "createdOn": DateTime.now().millisecondsSinceEpoch,
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
-      "createdBy": creatorsId
-    });
-    DocumentReference ref =await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").add(map);
-    DocumentSnapshot orderSnapshot = await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").get();
-    if(orderSnapshot.exists){
-      FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").update(
-          {
-            "priorityOrder" : FieldValue.arrayUnion([ref.id]) // priority order if a reversed list
-          });
-    }else{
-      FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").set(
-          {
-            "priorityOrder" : [ref.id] // priority order if a reversed list
-          });
-    }
+  static Future<String> insertMealPlan(String uid, MealPlan mealPlan,{String creatorsId}) async{
 
-    return ref.id;
-  }
-  static Future<String> insertUserNote( UserNote userNote,{String creatorsId}) async{
-    Map<String,dynamic> map =userNote.toJSON();
-    map.addAll({
-      "createdOn": DateTime.now().millisecondsSinceEpoch,
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
-      "createdBy": creatorsId
-    });
-    DocumentReference ref =await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").add(map);
-    DocumentSnapshot orderSnapshot = await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").get();
-    if(orderSnapshot.exists){
-      FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").update(
-          {
-            "priorityOrder" : FieldValue.arrayUnion([ref.id]) // priority order if a reversed list
-          });
-    }else{
-      FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").set(
-          {
-            "priorityOrder" : [ref.id] // priority order if a reversed list
-          });
-    }
-
-    return ref.id;
-  }
-  static Future<String> insertMealPlan(String uid, MealPlan mealPlan) async{
-
-    DocumentReference ref =await FirebaseFirestore.instance.collection('MealPlans').doc(uid).collection("PlannedRecipes").add(mealPlan.toJson());
+    DocumentReference ref = await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("MealPlans").add(mealPlan.toJson());
     return ref.id;
   }
   static Future<DocumentSnapshot> insertEquipment(Equipment equip,{String creatorsId}) async {
@@ -230,7 +180,7 @@ class FirebaseDB {
     });
     return ref.get();
   }
-
+  static Future<String> insertEvent(String uid, MyEvent myEvent){}
   static Future<String> updateUserProfile({String username, String userId,File profileImage,String aboutMe}) async {
     String imagePath = AppUser.instance.profileImagePath;
 
@@ -286,37 +236,23 @@ class FirebaseDB {
 
 
   }
-  static Future<void> updateListOrder(List<String> order,{String creatorsId }) async {
-    await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").update(
-        {
-          "priorityOrder" : order.reversed.toList() // priority order if a reversed list
-        });
-  }
 
   static Future<void> updateShoppingList( ShoppingList shoppingList,{String creatorsId}) async{
-    Map<String,dynamic> map =shoppingList.toJSON();
-    map.addAll({
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
+    Map<String,dynamic> data =shoppingList.toJSON();
+    data.addAll({
+      "updatedOn" : DateTime.now().millisecondsSinceEpoch
     });
+    await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("UserLists").doc('Groceries').set(data);
 
-    return await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc(shoppingList.listId).update(map);
   }
-  static Future<void> updateUserNote( UserNote userNote,{String creatorsId}) async{
-    Map<String,dynamic> map =userNote.toJSON();
-    map.addAll({
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
+  static Future<void> updateUserTaskList( TaskList task,{String creatorsId}) async{
+    Map<String,dynamic> data =task.toJSON();
+    data.addAll({
+      "updatedOn" : DateTime.now().millisecondsSinceEpoch
     });
-
-    return await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc(userNote.noteId).update(map);
+    await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("UserLists").doc('Tasks').set(data);
   }
-  static Future<void> updateUserTask( UserTask userTask,{String creatorsId}) async{
-    Map<String,dynamic> map =userTask.toJSON();
-    map.addAll({
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
-    });
-
-    return await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc(userTask.id).update(map);
-  }
+  static Future<void> updateEvent(MyEvent myEvent, {String creatorsId}){}
   static Future<void> updateIngredientCounter(String ingredientId) async {
     CollectionReference ingredients =
         FirebaseFirestore.instance.collection('Ingredients');
@@ -361,11 +297,32 @@ class FirebaseDB {
       "reportedRecipesIds" : FieldValue.arrayUnion([recipeId])
     });
   }
+
   static Future<DocumentSnapshot> fetchAppStats() async{
     return await FirebaseFirestore.instance.collection("Aggregate").doc('Stats').collection('App').doc('Stats').get();
   }
   static Future<DocumentSnapshot> fetchUserById(String userId) async{
      return await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+  }
+  static Future<QuerySnapshot> fetchRecipesByOwner(String creatorId, {int limit = 5,DocumentSnapshot lastDoc})async{
+    Query q =  FirebaseFirestore.instance.collection("Recipes")
+        .where("createdBy", isEqualTo: creatorId)
+        .orderBy("createdOn",descending: true);
+
+    if(lastDoc != null){
+      q = q.startAfterDocument(lastDoc);
+    }
+    return await q.limit(limit).get();
+  }
+  static Future<QuerySnapshot> fetchRecipesByLiked(String likerId, {int limit = 5,DocumentSnapshot lastDoc})async{
+    Query q =  FirebaseFirestore.instance.collection("Recipes")
+        .where("likedBy", arrayContains: likerId)
+        .orderBy("createdOn",descending: true);
+
+    if(lastDoc != null){
+      q = q.startAfterDocument(lastDoc);
+    }
+    return await q.limit(limit).get();
   }
 
   static Future<QuerySnapshot> fetchRecipesByTitle(String title, double calories, {int limit = 5,DocumentSnapshot lastDoc})async{
@@ -412,19 +369,12 @@ class FirebaseDB {
     return await q.limit(limit).get();
   }
 
-
+  static Future<void> fetchEventsByOwner( {String ownerId}){}
   static Future<DocumentSnapshot> fetchRecipeById(String reference) async {
     CollectionReference recipes =
         FirebaseFirestore.instance.collection('Recipes');
     DocumentReference ref = recipes.doc(reference);
     return await ref.get();
-  }
-  static Future<DocumentSnapshot> fetchUserListIds(String userId) async {
-    return await FirebaseFirestore.instance.collection('UserLists').doc(userId).collection("AllList").doc("order").get();
-  }
-  static Future<DocumentSnapshot> fetchUserListById(String listId,{String creatorsId}) async{
-    return await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc(listId).get();
-
   }
 
   static Future<DocumentSnapshot> fetchIngredientsById(String reference) async {
@@ -455,13 +405,19 @@ class FirebaseDB {
   }
 
 
-  static Future<QuerySnapshot<Map<String, dynamic>>>fetchMealPlans(String uid,{int numDaysBack = 7}) async{
-
+  static Future<QuerySnapshot<Map<String, dynamic>>>fetchMealPlans(String uid,{int numDaysBack = 7,String creatorsId}) async{
     DateTime nowDate = DateTime.now();
     int startDate = DateTime(nowDate.year,nowDate.month,nowDate.day).subtract(Duration(days: numDaysBack)).millisecondsSinceEpoch;
-    return await FirebaseFirestore.instance.collection('MealPlans').doc(uid).collection("PlannedRecipes").where("dateMillis",isGreaterThanOrEqualTo:startDate ).get();
+    return   await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("MealPlans").where("dateMillis",isGreaterThanOrEqualTo:startDate ).get();
   }
+  static Future<DocumentSnapshot<Map<String, dynamic>>>fetchUserTaskList({String creatorsId}) async{
 
+    return await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("UserLists").doc('Tasks').get();
+  }
+  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchUserShoppingList({String creatorsId}) async{
+
+    return await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("UserLists").doc('Groceries').get();
+  }
   static Future<DocumentSnapshot> fetchEquipmentById(String reference) async {
     CollectionReference equipment =
         FirebaseFirestore.instance.collection('Equipment');
@@ -491,20 +447,10 @@ class FirebaseDB {
   }
 
   static Future<void> deleteMealPlan(String uid, String mealPlanId)async{
-    await FirebaseFirestore.instance.collection('MealPlans').doc(uid).collection("PlannedRecipes").doc(mealPlanId).delete();
-  }
-
-  static Future<void> deleteListItem(String listItemId,{String creatorsId}) async{
-
-    await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc("order").update(
-        {
-          "priorityOrder" : FieldValue.arrayRemove([listItemId]) // priority order if a reversed list
-        });
-
-    return await FirebaseFirestore.instance.collection('UserLists').doc(creatorsId).collection("AllList").doc(listItemId).delete();
-
+    await FirebaseFirestore.instance.collection('Users').doc(uid).collection("MealPlans").doc(mealPlanId).delete();
 
   }
+  static Future<void> deleteEvent(String uid, String eventId){}
 
   static Future<String> _uploadImage(File _image, {String path}) async {
     /*

@@ -403,7 +403,10 @@ class Conversion {
         break;
       }
     }
+    if (digits > 1000)
     return num.toStringAsFixed(digits) + symbol;
+    else
+      return num.toString() +symbol;
   }
 
   static String prepString(String str) {

@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,10 +19,49 @@ class FavoritesNotifier extends ChangeNotifier {
   Recipe activeRecipe;
   bool currentlyFetchingMyRecipes = false;
   bool currentlyFetchingFavorites = false;
+  bool outOfFavoriteRecipes = false;
+  bool outOfMyCreations = false;
+
+  DocumentSnapshot lastCreatedDoc;
+  DocumentSnapshot lastFavoriteDoc;
+  int bachSz = 5;
+
+
+
+  int myCurrPage = 0;
+  int favCurrPage = 0;
+
+  Map<String,AppUser> posters = {};
+
+
 
 
   List<Recipe> get favoriteRecipes =>this._favoriteRecipes;
   List<Recipe> get myCreations =>this._myCreations;
+
+  void shouldRefresh({bool isMyRecipes = false}){
+    if(isMyRecipes){
+      _myCreations.clear();
+      myCurrPage = 0;
+      currentlyFetchingMyRecipes = false;
+      lastCreatedDoc = null;
+
+      outOfMyCreations = false;
+      fetchRecipes(fetchFavorites: false);
+
+    }
+    else{
+      _favoriteRecipes.clear();
+      favCurrPage = 0;
+      currentlyFetchingMyRecipes = false;
+      outOfFavoriteRecipes = false;
+      lastFavoriteDoc = null;
+      fetchRecipes();
+    }
+
+  }
+
+
 
 
   void clear(){
@@ -32,31 +70,45 @@ class FavoritesNotifier extends ChangeNotifier {
     activeRecipe = null;
     currentlyFetchingMyRecipes = false;
     currentlyFetchingFavorites = false;
+    outOfFavoriteRecipes = false;
+    outOfMyCreations = false;
+    lastCreatedDoc = null;
+    lastFavoriteDoc = null;
 
   }
 
-
+  Future<bool> fetchOwner(String ownerId) async {
+    DocumentSnapshot documentSnapshot = await FirebaseDB.fetchUserById(ownerId);
+    AppUser appUser =AppUser.fromJSON(documentSnapshot.data());
+    posters.update(ownerId,
+            (value) => appUser,
+        ifAbsent: () =>appUser
+    );
+    return true;
+  }
 
   void handleLikeEvent(String recipeId, {Recipe recipe}) {
 
 
-    if (!AppUser.instance.likedRecipesIds.contains(recipeId)) {
+    if ( !AppUser.instance.likedRecipes.contains(recipe.id)) {
 
-      FirebaseDB.likeRecipe(recipeId, AppUser.instance.uuid).then((_) {
-        if(recipe != null)_favoriteRecipes.insert(0, recipe);
-        AppUser.instance.likedRecipesIds.add(recipeId);
-        notifyListeners();
-      }).catchError((_){});
+      FirebaseDB.likeRecipe(recipeId, AppUser.instance.uuid).then((_) async {
+        recipe.likedBy.add(AppUser.instance.uuid);
+        _favoriteRecipes.add(recipe);
+        await fetchOwner(recipe.createdBy);
+        AppUser.instance.addLikeRecipe(recipe.id);
+
+      }).catchError((_){}).whenComplete(() =>    notifyListeners());
 
     } else {
 
 
 
       FirebaseDB.unlikeRecipe(recipeId, AppUser.instance.uuid).then((_){
-        _favoriteRecipes.removeWhere((element) => element.id == recipeId);
-        AppUser.instance.likedRecipesIds.remove(recipeId);
-        notifyListeners();
-      }).catchError((_){});
+        recipe.likedBy.remove(AppUser.instance.uuid);
+        _favoriteRecipes.removeWhere((rec) => rec.id == recipeId);
+           AppUser.instance.removeLikedRecipe(recipe.id);
+      }).catchError((_){}).whenComplete(() =>    notifyListeners());
 
     }
   }
@@ -98,7 +150,6 @@ class FavoritesNotifier extends ChangeNotifier {
       CustomToast(en_messages["recipe_create_success"]);
       FirebaseDB.fetchRecipeById(recipeId).then((DocumentSnapshot documentSnapshot) {
         Recipe createdRecipe = Recipe.fromJson(recipeRecords: documentSnapshot.data(),recipeId: documentSnapshot.id);
-        AppUser.instance.myCreationIds.insert(0, recipeId);
         _myCreations.insert(0, createdRecipe);
       }).whenComplete(() {
         notifyListeners();
@@ -114,42 +165,55 @@ class FavoritesNotifier extends ChangeNotifier {
   }
 
 
-  void fetchRecipes({int offset = 0,int limit = 6, bool fetchFavorites = true}){
-    List<String> subsetRecipes = [];
-    int fetchCount = 0;
+  void fetchRecipes({ bool fetchFavorites = true}){
+
     if(fetchFavorites){
-       fetchCount = max(min( AppUser.instance.likedRecipesIds.length - offset, limit),0);
-       if(fetchCount > 0){
-         currentlyFetchingFavorites = true;
-         subsetRecipes = AppUser.instance.likedRecipesIds.sublist(offset,offset + fetchCount);
-       }
-    }
-    else{
-      fetchCount = max(min( AppUser.instance.myCreationIds.length - offset, limit),0);
-      if(fetchCount > 0){
-        currentlyFetchingMyRecipes = true;
-        subsetRecipes = AppUser.instance.myCreationIds.sublist(offset,offset +fetchCount);
-      }
-    }
-    if(subsetRecipes.length > 0){
-      Future.forEach<String>(subsetRecipes, (String recipeId) async {
-       DocumentSnapshot documentSnapshot = await FirebaseDB.fetchRecipeById(recipeId);
-       if(documentSnapshot.exists){
-         Recipe fetchedRecipe = Recipe.fromJson(recipeRecords: documentSnapshot.data(), recipeId: documentSnapshot.id);
-         if(fetchFavorites)
-           _favoriteRecipes.add(fetchedRecipe);
-         else
-           _myCreations.add(fetchedRecipe);
+      currentlyFetchingFavorites = true;
+      FirebaseDB.fetchRecipesByLiked(AppUser.instance.uuid, limit: bachSz,lastDoc: lastFavoriteDoc)
+          .then((QuerySnapshot queryDocumentSnapshot) {
+        if (queryDocumentSnapshot.docs.length > 0) {
+          queryDocumentSnapshot.docs.forEach((
+              QueryDocumentSnapshot queryDocumentSnapshot) async {
+            Recipe fetchedRecipe = Recipe.fromJson(
+                recipeRecords: queryDocumentSnapshot.data(),
+                recipeId: queryDocumentSnapshot.id);
+            _favoriteRecipes.add(fetchedRecipe);
+            await fetchOwner(fetchedRecipe.createdBy);
+            AppUser.instance.addLikeRecipe(fetchedRecipe.id);
 
-       }
+
+          });
+          lastFavoriteDoc = queryDocumentSnapshot.docs.last;
+          if(queryDocumentSnapshot.docs.length < bachSz)outOfFavoriteRecipes = true;
+        }
       }).whenComplete(() {
-
-        if(fetchFavorites) currentlyFetchingFavorites = false;
-        else currentlyFetchingMyRecipes = false;
+        currentlyFetchingMyRecipes = false;
         notifyListeners();
       });
+    }
+    else {
+      currentlyFetchingMyRecipes = true;
+      FirebaseDB.fetchRecipesByOwner(AppUser.instance.uuid, limit: bachSz,lastDoc: lastCreatedDoc)
+          .then((QuerySnapshot queryDocumentSnapshot) {
+        if (queryDocumentSnapshot.docs.length > 0) {
+          queryDocumentSnapshot.docs.forEach((
+              QueryDocumentSnapshot queryDocumentSnapshot) async {
+            Recipe fetchedRecipe = Recipe.fromJson(
+                recipeRecords: queryDocumentSnapshot.data(),
+                recipeId: queryDocumentSnapshot.id);
+            _myCreations.add(fetchedRecipe);
+            await fetchOwner(fetchedRecipe.createdBy);
+            if(fetchedRecipe.likedBy.contains(AppUser.instance.uuid) )AppUser.instance.addLikeRecipe(fetchedRecipe.id);
 
 
+          });
+          lastCreatedDoc = queryDocumentSnapshot.docs.last;
+          if(queryDocumentSnapshot.docs.length < bachSz)outOfMyCreations = true;
+        }
+      }).whenComplete(() {
+        currentlyFetchingMyRecipes = false;
+        notifyListeners();
+      });
     }
 
   }

@@ -64,7 +64,7 @@ class _RecipeTimeState extends State<RecipeTime> {
                             Text(
                               "Days",
                               style: TextStyle(
-                                  fontSize: 21.2.h,
+                                  fontSize: 22.h,
                                   color: color_palette["background_color"]),
                             ),
                             NumberPicker(
@@ -77,10 +77,10 @@ class _RecipeTimeState extends State<RecipeTime> {
                                   setState(() => _dayValue = value),
                               selectedTextStyle: TextStyle(
                                   color: color_palette["text_color_alt"],
-                                  fontSize: 23.h),
+                                  fontSize: 28.h),
                               textStyle: TextStyle(
                                   color: color_palette["text_color_dark"],
-                                  fontSize: 18.h),
+                                  fontSize: 23.h),
                             ),
                           ],
                         ),
@@ -94,7 +94,7 @@ class _RecipeTimeState extends State<RecipeTime> {
                             Text(
                               "Hours",
                               style: TextStyle(
-                                  fontSize: 21.2.h,
+                                  fontSize: 22.h,
                                   color: color_palette["background_color"]),
                             ),
                             NumberPicker(
@@ -107,10 +107,10 @@ class _RecipeTimeState extends State<RecipeTime> {
                                   setState(() => _hourValue = value),
                               selectedTextStyle: TextStyle(
                                   color: color_palette["text_color_alt"],
-                                  fontSize: 23.h),
+                                  fontSize: 28.h),
                               textStyle: TextStyle(
                                   color: color_palette["text_color_dark"],
-                                  fontSize: 18.h),
+                                  fontSize: 23.h),
                             ),
                           ],
                         ),
@@ -124,7 +124,7 @@ class _RecipeTimeState extends State<RecipeTime> {
                             Text(
                               "Minutes",
                               style: TextStyle(
-                                  fontSize: 21.2.h,
+                                  fontSize: 22.h,
                                   color: color_palette["background_color"]),
                             ),
                             NumberPicker(
@@ -137,10 +137,10 @@ class _RecipeTimeState extends State<RecipeTime> {
                                   setState(() => _minuteValue = value),
                               selectedTextStyle: TextStyle(
                                   color: color_palette["text_color_alt"],
-                                  fontSize: 23.h),
+                                  fontSize: 28.h),
                               textStyle: TextStyle(
                                   color: color_palette["text_color_dark"],
-                                  fontSize: 18.h),
+                                  fontSize: 23.h),
                             ),
                           ],
                         )
@@ -167,9 +167,9 @@ class _RecipeTimeState extends State<RecipeTime> {
 
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
-                                                  fontSize: 26.5.h,
+                                                  fontSize: 28.h,
                                                   color: color_palette[
-                                                  "text_color_alt"]),
+                                                  "background_color"]),
                                             ))))),
                             Expanded(
                                 child: Container(
@@ -189,9 +189,9 @@ class _RecipeTimeState extends State<RecipeTime> {
                                           "Submit",
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                            fontSize: 26.5.h,
+                                            fontSize: 28.h,
                                               color: color_palette[
-                                                  "text_color_alt"]),
+                                                  "background_color"]),
                                         ))))),
 
                           ],

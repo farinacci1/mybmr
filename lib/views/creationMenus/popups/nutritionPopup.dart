@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mybmr/constants/Themes.dart';
 import 'package:mybmr/services/custom_rect_twenn.dart';
 import 'package:mybmr/widgets/unitOfMeasurementsPicker.dart';
 import 'package:mybmr/constants/Constants.dart';
@@ -67,23 +68,26 @@ class _NutritionPopupState extends State<NutritionPopup> {
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Material(
               elevation: 3,
-              color: Colors.grey[200],
+              color: color_palette["white"],
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20)),
               child: Container(
                   width: 344.5.h,
-                  padding: EdgeInsets.only(top: 26.5.h, bottom: 5),
-                  child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: AlignmentDirectional.topCenter,
+                  padding: EdgeInsets.only(top: 18.h, bottom: 5),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                       children: [
+                        Text(
+                          "  Nutrition  ",
+                          style: TextStyle(
+                              fontSize: 31.8.h,
+
+                              color: Colors.grey[500]),
+                        ),
                         Container(
                             width: 318.h,
                             padding: EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                              top: BorderSide(color: Colors.deepPurpleAccent),
-                            )),
+
                             child: SingleChildScrollView(
                                 child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -158,15 +162,7 @@ class _NutritionPopupState extends State<NutritionPopup> {
                                     ),
                                   )
                                 ]))),
-                        Positioned(
-                            top: -19.875.h,
-                            child: Text(
-                              "  Nutrition  ",
-                              style: TextStyle(
-                                  fontSize: 31.8.h,
-                                  backgroundColor: Colors.grey[200],
-                                  color: Colors.grey[500]),
-                            ))
+
                       ])))),
     ));
   }

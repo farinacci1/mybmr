@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mybmr/constants/Themes.dart';
 import 'package:mybmr/services/RecipeScraper.dart';
 import 'package:mybmr/services/custom_rect_twenn.dart';
 
@@ -45,11 +46,11 @@ class _RecipeImporterState extends State<RecipeImporter> {
               return CustomRectTween(begin: begin, end: end);
             },
             child: Container(
-                width: 344.5.h,
+                width: 380.h,
                 margin: EdgeInsets.only(
                     bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: Material(
-                  color: Colors.white,
+                  color: color_palette["white"],
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15)),
                   child: SingleChildScrollView(
@@ -61,7 +62,7 @@ class _RecipeImporterState extends State<RecipeImporter> {
                           child: Text(
                             "Import Recipe",
                             style: TextStyle(
-                                fontSize: 23.85.h, color: Colors.black),
+                                fontSize: 28.h, color: Colors.black),
                           )),
                       Container(
                           height: 66.25.h,
@@ -110,7 +111,7 @@ class _RecipeImporterState extends State<RecipeImporter> {
                           height: 238.5.h,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
-                            color: Colors.indigoAccent,
+                            color: Color.alphaBlend(color_palette["background_color"], color_palette["white"]),
                           ),
                           child: Column(children: [
                             Expanded(
@@ -120,12 +121,12 @@ class _RecipeImporterState extends State<RecipeImporter> {
                               children: fairPracticeRules
                                   .map((e) => Container(
                                         padding:
-                                            EdgeInsets.fromLTRB(5, 5, 5, 0),
+                                            EdgeInsets.fromLTRB(10, 5, 5, 0),
                                         child: Text(
                                           e,
-                                          textAlign: TextAlign.center,
+                                          textAlign: TextAlign.left,
                                           style: TextStyle(
-                                              fontSize: 21.2.h,
+                                              fontSize: 22.h,
                                               color: Colors.greenAccent),
                                         ),
                                       ))
@@ -145,7 +146,7 @@ class _RecipeImporterState extends State<RecipeImporter> {
                                         padding: EdgeInsets.symmetric(vertical: 9),
 
                                         alignment: AlignmentDirectional.center,
-                                        child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 21.h),),
+                                        child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 24.h),),
                                       )),
                                   GestureDetector(
                                       onTap: () async {
@@ -163,7 +164,7 @@ class _RecipeImporterState extends State<RecipeImporter> {
                                         padding: EdgeInsets.symmetric(vertical: 9),
 
                                         alignment: AlignmentDirectional.center,
-                                        child: Text("Search",style: TextStyle(color: Colors.white,fontSize: 21.h),),
+                                        child: Text("Search",style: TextStyle(color: Colors.white,fontSize: 24.h),),
                                       )),
 
 

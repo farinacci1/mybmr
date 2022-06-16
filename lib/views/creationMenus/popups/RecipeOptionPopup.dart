@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mybmr/models/Recipe.dart';
@@ -24,6 +25,9 @@ class _RecipeOptionPopupState extends State<RecipeOptionPopup> {
   static const String RECIPE_OPTON_POPUP = "RECIPE_OPTON_POPUP";
   @override
   Widget build(BuildContext context) {
+
+
+
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -48,18 +52,7 @@ class _RecipeOptionPopupState extends State<RecipeOptionPopup> {
                   child: Container(
                     decoration: BoxDecoration(
 
-                         gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        Color(0xffd2ccc4),
-                        Color(0xff04619f),
-                        Color(0xff380036),
-                        Color(0xff380036),
-                        Color(0xff380036),
-                        Color(0xff380036),
-                      ],
-                    ),
+                        color: color_palette["background_color"],
                         borderRadius: BorderRadius.circular(20)
                     ),
 
@@ -69,19 +62,18 @@ class _RecipeOptionPopupState extends State<RecipeOptionPopup> {
                       children: [
                         Container(
                           alignment: AlignmentDirectional.center,
-                          constraints:  BoxConstraints(minHeight: 132.5.h),
-                          child: Container(
-                            constraints: BoxConstraints(minHeight: 92.75.h,minWidth: 92.75.h),
                             height: 92.75.h,
                             width: 92.75.h,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(13.125.h),
-                                image: DecorationImage(
-                                    image: NetworkImage(
-                                        widget.recipe.recipeImageFromDB),
-                                    fit: BoxFit.cover
-                                )),
-                          ),
+                          margin: EdgeInsets.symmetric(vertical: 20.h),
+                          
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30.h),
+                              child:_buildImage(
+                            widget.recipe.recipeImageFromDB,
+                            height: 92.75.h,
+                            width: 92.75.h,
+                            aspect: 1.0
+                          ))
                         ),
                         Container(
                             width: 331.25.h,
@@ -115,10 +107,13 @@ class _RecipeOptionPopupState extends State<RecipeOptionPopup> {
                                     onPressed: () async {
                                       Map<String, dynamic> out =
                                           await Navigator.of(context)
-                                          .pushReplacement(HeroDialogRoute(
+                                          .push(HeroDialogRoute(
+                                              statusBarColor: Color.alphaBlend(Color(0x33FFFFFF), color_palette["white"]),
+                                          bgColor: Colors.transparent,
                                           builder: (context) {
                                            return RecipeNutrition(recipe: widget.recipe,);
                                           }));
+                                      Navigator.of(context).pop();
                                     },
                                     style: ElevatedButton.styleFrom(
                                         fixedSize: Size(304.75.h, 53.h),
@@ -147,10 +142,13 @@ class _RecipeOptionPopupState extends State<RecipeOptionPopup> {
                                     onPressed: () async {
                                       Map<String, dynamic> out =
                                       await Navigator.of(context)
-                                          .pushReplacement(HeroDialogRoute(
+                                          .push(HeroDialogRoute(
+                                          statusBarColor: Color.alphaBlend(Color(0x33FFFFFF), color_palette["white"]),
+                                          bgColor: Colors.transparent,
                                           builder: (context) {
                                             return ReportPopup(recipe: widget.recipe,);
                                           }));
+                                      Navigator.of(context).pop();
                                     },
                                     style: ElevatedButton.styleFrom(
                                         fixedSize: Size(304.75.h, 53.h),
@@ -172,5 +170,20 @@ class _RecipeOptionPopupState extends State<RecipeOptionPopup> {
                     ),
                   ),
                 ))));
+  }
+  Widget _buildImage(String recipeImageFromDB,
+      {double height = 300, double width = 300, aspect = 0.75}) {
+    return AspectRatio(
+      aspectRatio: aspect,
+      child: Container(
+        width: double.infinity,
+        child: ClipRRect(
+            child: FancyShimmerImage(
+              imageUrl: recipeImageFromDB,
+              height: height,
+              width: width,
+            )),
+      ),
+    );
   }
 }

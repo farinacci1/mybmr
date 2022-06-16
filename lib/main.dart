@@ -56,11 +56,12 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,
+
           theme: ThemeData(
               primarySwatch: Colors.blue,
               visualDensity: VisualDensity.adaptivePlatformDensity,
               scaffoldBackgroundColor: Colors.black38,
-              fontFamily: "Arabato"),
+              fontFamily: "Araboto"),
           home: AnimatedSplashScreen.withScreenFunction(
             splash: "assets/images/MyBMR.png",
             splashIconSize: 230,

@@ -1,18 +1,14 @@
 import '../abstractions/UserListItem.dart';
 
-class UserTask implements ListItem{
+class TaskList implements ListItem{
 
-  String id;
-  String title;
   List<String> subtasks;
   List<bool> hasCompleted;
 
 
-  UserTask({this.id,this.title,this.subtasks,this.hasCompleted});
+  TaskList({this.subtasks,this.hasCompleted});
 
-  UserTask.fromJSON(Map<String,dynamic> data,String taskId){
-    id = taskId;
-    title = data["title"];
+  TaskList.fromJSON(Map<String,dynamic> data){
     subtasks = List.from(data["subtasks"]);
     hasCompleted = List.from(data["hasCompleted"]);
   }
@@ -21,15 +17,9 @@ class UserTask implements ListItem{
   @override
   Map<String,dynamic> toJSON({bool isShared = false}){
     Map<String,dynamic> data = {
-      "title" :title,
       "subtasks" : subtasks,
       "hasCompleted" :hasCompleted
     };
-    if(isShared){
-      data.addAll({
-        "id" : id
-      });
-    }
     return data;
   }
 }
