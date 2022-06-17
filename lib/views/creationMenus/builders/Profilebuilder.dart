@@ -18,6 +18,7 @@ import '../../../notifiers/MealPlanNotifier.dart';
 import '../../../notifiers/UserListNotifier.dart';
 import '../../../notifiers/UserNotifier.dart';
 import '../../../services/Firebase_db.dart';
+import '../../../services/helper.dart';
 import '../../../services/toast.dart';
 import '../../../widgets/ImageCropper.dart';
 
@@ -73,6 +74,9 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
             onPressed: ()async {
               String username = _usernameController.value.text.trim();
               String aboutMe = _aboutMeController.value.text.trim();
+              String youtubeUrl = _youtubeUrlController.value.text.trim();
+              String tiktoktUrl = _tiktokUrlController.value.text.trim();
+              String websiteUrl = _businessUrlController.value.text.trim();
               bool isAvailable = true;
               if( username.length <= 2)         CustomToast("Username is to short!");
               else if (username != AppUser.instance.userName ) {
@@ -80,14 +84,23 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                 await FirebaseDB.isUsernameAvailable(username);
               }
               if (isAvailable) {
+                if(websiteUrl.startsWith( "https://"))AppUser.instance.businessUrl = websiteUrl;
+                if(youtubeUrl.startsWith("https://www.youtube.com/watch?v="))AppUser.instance.youtubeUrl = youtubeUrl;
+                if(tiktoktUrl.startsWith( "https://vm.tiktok.com/") || tiktoktUrl.startsWith( "https://www.tiktok.com/") )AppUser.instance.tiktokUrl = tiktoktUrl;
                 String imagePath = await FirebaseDB.updateUserProfile(
                     userId: AppUser.instance.uuid,
                     username: username,
                     aboutMe: aboutMe,
-                    profileImage: imageFile);
+                    profileImage: imageFile,
+                  businessUrl: AppUser.instance.businessUrl,
+                  tiktokUrl:  AppUser.instance.tiktokUrl,
+                  youtubeUrl:  AppUser.instance.youtubeUrl
+                );
                 AppUser.instance.profileImagePath = imagePath;
                 AppUser.instance.userName = username;
                 AppUser.instance.aboutUser = aboutMe;
+
+
                 Navigator.pop(context);
               } else {
 
@@ -145,11 +158,13 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                                     radius: 100.h,
                                   )
                                 : AppUser.instance.profileImagePath != null
-                                    ? CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                            AppUser.instance.profileImagePath),
-                                        radius: 100.h,
-                                      )
+                                    ? buildImage(
+                              AppUser.instance.profileImagePath,
+                              height: 200.h,
+                              width: 200.h,
+                              boxFit: BoxFit.cover,
+                              radius: BorderRadius.circular(200.h),
+                            )
                                     : Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -300,7 +315,7 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                                     filled: true,
                                     fillColor: Colors.black54,
                                     hintText:
-                                    "https://www.myfoodtruck.com/",
+                                    "https://",
                                     hintStyle: TextStyle(
                                       color: color_palette["white"],
                                     ),
@@ -437,12 +452,13 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                                 onPrimary: color_palette["background_color"],
                                 shape: ContinuousRectangleBorder(),
                                 alignment:
-                                AlignmentDirectional.centerStart),
+                                AlignmentDirectional.center),
                             child:
                             Text(
                               " Logout",
                               style: TextStyle(
                                 fontSize: 23.85.h,
+                                fontWeight: FontWeight.bold
                               ),
                             )
                         ),

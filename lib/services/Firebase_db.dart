@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:mybmr/models/AppUser.dart';
-import 'package:mybmr/models/Event.dart';
+
 import 'package:mybmr/models/MealPlan.dart';
 import 'package:mybmr/models/ShoppingList.dart';
 
@@ -29,13 +29,13 @@ class FirebaseDB {
     DocumentSnapshot ds = await users.doc(uid).get();
     if(!ds.exists){
       await users.doc(uid).set({
-        "likedRecipesIds": [],
         "reportedRecipesIds":[],
-        "myFriends" : [],
         "userName": uid,
         "profileImage":null,
         "aboutUser" : "",
-        "webLink" : "",
+        "businessUrl" : "",
+        "youtubeUrl" : "",
+        "tiktokUrl" : "",
         "following" : [],
         "followedBy" : 0,
         "numCreated": 0,
@@ -180,8 +180,9 @@ class FirebaseDB {
     });
     return ref.get();
   }
-  static Future<String> insertEvent(String uid, MyEvent myEvent){}
-  static Future<String> updateUserProfile({String username, String userId,File profileImage,String aboutMe}) async {
+
+  static Future<String> updateUserProfile({String username, String userId,File profileImage,String aboutMe,
+  String businessUrl, String youtubeUrl, String tiktokUrl}) async {
     String imagePath = AppUser.instance.profileImagePath;
 
     if(profileImage != null){
@@ -193,7 +194,10 @@ class FirebaseDB {
    await FirebaseFirestore.instance.collection('Users').doc(userId).update({
      "userName": username,
      "aboutUser" :aboutMe,
-     "profileImage" : imagePath
+     "profileImage" : imagePath,
+     "businessUrl" : businessUrl,
+     "youtubeUrl" : youtubeUrl,
+     "tiktokUrl" : tiktokUrl
    });
     return imagePath;
 
@@ -252,7 +256,7 @@ class FirebaseDB {
     });
     await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("UserLists").doc('Tasks').set(data);
   }
-  static Future<void> updateEvent(MyEvent myEvent, {String creatorsId}){}
+
   static Future<void> updateIngredientCounter(String ingredientId) async {
     CollectionReference ingredients =
         FirebaseFirestore.instance.collection('Ingredients');
@@ -450,7 +454,7 @@ class FirebaseDB {
     await FirebaseFirestore.instance.collection('Users').doc(uid).collection("MealPlans").doc(mealPlanId).delete();
 
   }
-  static Future<void> deleteEvent(String uid, String eventId){}
+
 
   static Future<String> _uploadImage(File _image, {String path}) async {
     /*

@@ -14,6 +14,10 @@ class AppUser{
   int numFollowedBy;
   int numFollowing;
   List<String> likedRecipes = [];
+  String _businessUrl = "";
+  String _youtubeUrl = "";
+  String _tiktokUrl = "";
+
 
   AppUser.fromJSON(Map<String,dynamic> data){
     this._userName = data["userName"] ?? this._uuid;
@@ -23,8 +27,24 @@ class AppUser{
     this._profileImagePath = data["profileImage"] ?? "";
     this.numCreated = data["numCreated"] ?? 0;
     this.numLiked = data["numLiked"] ?? 0;
+    this._businessUrl =data["businessUrl"] ?? "";
+    this._youtubeUrl =data["youtubeUrl"] ?? "";
+    this._tiktokUrl =data["tiktokUrl"] ?? "";
 
   }
+  void fromJSON(Map<String,dynamic> data){
+    this._userName = data["userName"] ?? this._uuid;
+    this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
+    this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
+    this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
+    this._profileImagePath = data["profileImage"] ?? "";
+    this.numCreated = data["numCreated"] ?? 0;
+    this.numLiked = data["numLiked"] ?? 0;
+    this._businessUrl =data["businessUrl"] ?? "";
+    this._youtubeUrl =data["youtubeUrl"] ?? "";
+    this._tiktokUrl =data["tiktokUrl"] ?? "";
+  }
+
   String get uuid => _uuid;
   void set uuid(String idToken){this._uuid = idToken;}
   String get signInMethod => _signInMethod;
@@ -33,7 +53,18 @@ class AppUser{
   void set aboutUser(String aboutMe){
     this._aboutUser = aboutMe;
   }
-
+  String get businessUrl => _businessUrl;
+  void set businessUrl(String businessUrl){
+    this._businessUrl = businessUrl;
+  }
+  String get youtubeUrl => _youtubeUrl;
+  void set youtubeUrl(String youtubeUrl){
+    this._youtubeUrl = youtubeUrl;
+  }
+  String get tiktokUrl => _tiktokUrl;
+  void set tiktokUrl(String tiktokUrl){
+    this._tiktokUrl = tiktokUrl;
+  }
 
   List<String> get reportedRecipesIds => _reportedRecipesIds;
   void set userName(String userName){this._userName = userName;}
@@ -45,6 +76,10 @@ class AppUser{
     _reportedRecipesIds.clear();
     likedRecipes.clear();
     _userName = "";
+    _businessUrl = "";
+    _tiktokUrl = "";
+    _youtubeUrl = "";
+
   }
   void addLikeRecipe(String recipeId){
     if(!likedRecipes.contains(recipeId)) likedRecipes.add(recipeId);
@@ -53,14 +88,6 @@ class AppUser{
     if(likedRecipes.contains(recipeId)) likedRecipes.remove(recipeId);
   }
 
-  void fromJSON(Map<String,dynamic> data){
-    this._userName = data["userName"] ?? this._uuid;
-
-    this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
-    this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
-    this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
-    this._profileImagePath = data["profileImage"] ?? null;
-  }
 
 
   void insertReportedRecipe(String recipeId){

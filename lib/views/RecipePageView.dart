@@ -135,7 +135,6 @@ class _RecipePageViewState extends State<RecipePageView> {
                           MaterialPageRoute(
                               builder: (context) =>
                                   RecipeBuilder(recipe: activeRecipe)));
-                      if(response!= null  && response["isUpdated"] == true)Navigator.pop(context);
 
                       setState(() {
                         openBottomMenu = false;
@@ -163,9 +162,6 @@ class _RecipePageViewState extends State<RecipePageView> {
                                     recipe: activeRecipe,
                                     shouldClone: true,
                                   )));
-                      if (response != null && response["isCreated"] == true)
-                        Navigator.pop(context);
-
                       setState(() {
                         openBottomMenu = false;
                       });
@@ -532,10 +528,12 @@ class _RecipePageViewState extends State<RecipePageView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                      child: (getAppUser(recipe.createdBy).profileImagePath ==
+                      child: (
+                  getAppUser(recipe.createdBy) == null ||
+                      ( getAppUser(recipe.createdBy).profileImagePath ==
                                   null ||
                               getAppUser(recipe.createdBy).profileImagePath ==
-                                  "")
+                                  ""))
                           ? Icon(
                               FontAwesomeIcons.userAstronaut,
                               color: Color(0XFF6D6D64),
@@ -548,7 +546,7 @@ class _RecipePageViewState extends State<RecipePageView> {
                               wrapperWidth: 60.h,
                               radius: BorderRadius.circular(60.h),
                             )),
-                  Container(
+                  if(getAppUser(recipe.createdBy) != null) Container(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     width: MediaQuery.of(context).size.width - 125,
                     child: Column(

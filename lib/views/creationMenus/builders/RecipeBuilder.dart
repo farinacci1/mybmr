@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
+import 'package:mybmr/models/AppUser.dart';
 import 'package:mybmr/services/helper.dart';
 import 'package:mybmr/widgets/ImageCropper.dart';
 
@@ -906,7 +907,10 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
     await Navigator.of(context).push(HeroDialogRoute(builder: (context) {
       return RuleConfirmationPopup();
     }));
-    if (out != null && out["confirmed"] == true) {
+    if(!AppUser.instance.isUserSignedIn() ){
+      CustomToast("Must be signed in to add recipe");
+    }
+    else if (out != null && out["confirmed"] == true ) {
       Provider.of<FavoritesNotifier>(context, listen: false).addRecipe(recipe);
       clearRecipe();
       if (widget.recipe != null) Navigator.pop(context, {"isCreated": true});

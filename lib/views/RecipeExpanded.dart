@@ -22,6 +22,8 @@ import 'package:provider/provider.dart';
 import '../app_icons.dart';
 import '../constants/Themes.dart';
 import '../models/Ingredient.dart';
+import '../services/hero_dialog_route.dart';
+import 'creationMenus/popups/RecipeNutrition.dart';
 
 class RecipeExpanded extends StatefulWidget {
   @required
@@ -32,7 +34,8 @@ class RecipeExpanded extends StatefulWidget {
 }
 
 class _RecipeExpandedState extends State<RecipeExpanded> {
-  SystemUiOverlayStyle _systemUiOverlayStyle =   SystemUiOverlayStyle(statusBarColor: Colors.transparent);
+  SystemUiOverlayStyle _systemUiOverlayStyle =
+      SystemUiOverlayStyle(statusBarColor: Colors.transparent);
   @override
   void initState() {
     Provider.of<RecipeFieldsNotifier>(context, listen: false).recipeState =
@@ -44,7 +47,6 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
 
   @override
   Widget build(BuildContext context) {
-
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -74,7 +76,7 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                       forceElevated: true,
                       backgroundColor: color_palette["white"],
                       actionsIconTheme: IconThemeData(opacity: 0.0),
-                      systemOverlayStyle:  _systemUiOverlayStyle,
+                      systemOverlayStyle: _systemUiOverlayStyle,
                       leading: IconButton(
                           icon: Icon(FontAwesomeIcons.arrowLeft),
                           tooltip: 'Click to Home Screen',
@@ -170,91 +172,93 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                         Container(
                           width: MediaQuery.of(context).size.width - 28.0,
                           height: 125.h,
-                          margin: EdgeInsets.fromLTRB(14,12,14,0),
-
-                          child:
-                        rp.recipeState == ActiveRecipeState.LOADING
-                            ? Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                                alignment: AlignmentDirectional.center,
-                                child: JumpingDotsProgressIndicator(
-                                  fontSize: 26.5.h,
-                                  color: color_palette["white"],
-                                ),
-                              )
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: Provider.of<RecipeFieldsNotifier>(
-                                        context,
-                                        listen: false)
-                                    .ingredientsForActiveRecipe
-                                    .length,
-                                itemBuilder: (context, index) {
-                                  Ingredient ingredient =
-                                      Provider.of<RecipeFieldsNotifier>(context,
-                                              listen: false)
-                                          .ingredientsForActiveRecipe[index];
-                                  RecipeIngredient current = widget
-                                      .recipe.recipeIngredients
-                                      .firstWhere(
-                                          (RecipeIngredient rp) =>
-                                              rp.ingredientId == ingredient.id,
-                                          orElse: () => null);
-                                  return Container(
-                                    alignment: AlignmentDirectional.center,
-                                    margin: EdgeInsets.only( right: 10),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                            width: 53.h,
-                                            height: 53.h,
-                                            decoration: BoxDecoration(
+                          margin: EdgeInsets.fromLTRB(14, 12, 14, 0),
+                          child: rp.recipeState == ActiveRecipeState.LOADING
+                              ? Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  alignment: AlignmentDirectional.center,
+                                  child: JumpingDotsProgressIndicator(
+                                    fontSize: 26.5.h,
+                                    color: color_palette["white"],
+                                  ),
+                                )
+                              : ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: Provider.of<RecipeFieldsNotifier>(
+                                          context,
+                                          listen: false)
+                                      .ingredientsForActiveRecipe
+                                      .length,
+                                  itemBuilder: (context, index) {
+                                    Ingredient ingredient =
+                                        Provider.of<RecipeFieldsNotifier>(
+                                                context,
+                                                listen: false)
+                                            .ingredientsForActiveRecipe[index];
+                                    RecipeIngredient current = widget
+                                        .recipe.recipeIngredients
+                                        .firstWhere(
+                                            (RecipeIngredient rp) =>
+                                                rp.ingredientId ==
+                                                ingredient.id,
+                                            orElse: () => null);
+                                    return Container(
+                                      alignment: AlignmentDirectional.center,
+                                      margin: EdgeInsets.only(right: 10),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                              width: 53.h,
+                                              height: 53.h,
+                                              decoration: BoxDecoration(
+                                                  color: color_palette[
+                                                      "text_color_dark"],
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                    Radius.circular(53.h / 2),
+                                                  ),
+                                                  image: (ingredient == null ||
+                                                          ingredient
+                                                                  .ingredientImageFromDB ==
+                                                              null ||
+                                                          ingredient
+                                                                  .ingredientImageFromDB
+                                                                  .length <=
+                                                              0)
+                                                      ? DecorationImage(
+                                                          image: AssetImage(
+                                                              "assets/images/BMRLogo.png"),
+                                                          fit: BoxFit.fill)
+                                                      : DecorationImage(
+                                                          image: NetworkImage(
+                                                              ingredient
+                                                                  .ingredientImageFromDB),
+                                                          fit: BoxFit.fill))),
+                                          Text(
+                                            "${ingredient.ingredientName}",
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                                fontSize: 23.85.h,
                                                 color: color_palette[
-                                                    "text_color_dark"],
-                                                borderRadius: BorderRadius.all(
-                                                  Radius.circular(53.h / 2),
-                                                ),
-                                                image: (ingredient == null ||
-                                                        ingredient
-                                                                .ingredientImageFromDB ==
-                                                            null ||
-                                                        ingredient
-                                                                .ingredientImageFromDB
-                                                                .length <=
-                                                            0)
-                                                    ? DecorationImage(
-                                                        image: AssetImage(
-                                                            "assets/images/BMRLogo.png"),
-                                                        fit: BoxFit.fill)
-                                                    : DecorationImage(
-                                                        image: NetworkImage(
-                                                            ingredient
-                                                                .ingredientImageFromDB),
-                                                        fit: BoxFit.fill))),
-                                        Text(
-                                          "${ingredient.ingredientName}",
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                              fontSize: 23.85.h,
-                                              color: color_palette["background_color"]),
-                                        ),
-                                        Text(
-                                          "${current.amountOfIngredient}${current.unitOfMeasurement}",
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                              fontSize: 21.2.h,
-                                              color: color_palette["background_color"]),
-                                        )
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                                    "background_color"]),
+                                          ),
+                                          Text(
+                                            "${current.amountOfIngredient}${current.unitOfMeasurement}",
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                                fontSize: 21.2.h,
+                                                color: color_palette[
+                                                    "background_color"]),
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  }),
                         ),
                         Container(
                           margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                           alignment: AlignmentDirectional.topStart,
-
                           child: Text(
                             "Equipment",
                             maxLines: 1,
@@ -267,7 +271,6 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                         Container(
                           width: MediaQuery.of(context).size.width - 28.0,
                           height: 104.h,
-
                           margin:
                               EdgeInsets.symmetric(vertical: 2, horizontal: 14),
                           alignment: AlignmentDirectional.center,
@@ -322,7 +325,8 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                                             maxLines: 1,
                                             style: TextStyle(
                                                 fontSize: 23.85.h,
-                                                color: color_palette["background_color"]),
+                                                color: color_palette[
+                                                    "background_color"]),
                                           )
                                         ],
                                       ),
@@ -355,7 +359,8 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                                     Container(
                                       margin: EdgeInsets.only(top: 10),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Stack(
                                             alignment:
@@ -400,16 +405,36 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          alignment: AlignmentDirectional.topStart,
-                          child: Text(
-                            en_messages["nutritional_value_per_serv_label"],
-                            style: TextStyle(
-                                fontSize: 20.h,
-                                color: color_palette["background_color"],
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                            margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                              Text(
+                                en_messages["nutritional_value_per_serv_label"],
+                                style: TextStyle(
+                                    fontSize: 20.h,
+                                    color: color_palette["background_color"],
+                                    fontWeight: FontWeight.bold),
+                              ),
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                      onTap: () async {
+                                        await Navigator.of(context).push(HeroDialogRoute(
+                                            statusBarColor: Colors.transparent,
+                                            bgColor: Colors.transparent,
+                                            builder: (context) {
+                                              return RecipeNutrition(
+                                                recipe: widget.recipe,
+                                              );
+                                            }));
+                                      },
+                                      child:
+                                  Icon(
+                                    AntDesign.exclamationcircleo,
+                                    color: color_palette["background_color"],
+                                    size: 20.h,
+                                  ))
+                            ])),
                         Container(
                             width: MediaQuery.of(context).size.width - 28,
                             height: 337.857.h,
@@ -430,24 +455,27 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                                     title:
                                         'Protein\n${Conversion.computePercentageValue(widget.recipe.nutritionalValue["totalProtein"] * 4, widget.recipe.nutritionalValue["totalCalories"]).toStringAsFixed(2)}%',
                                     titleStyle: TextStyle(
-                                        color: color_palette["background_color"],
-                                        fontSize: 21.2.h,fontWeight: FontWeight.bold),
+                                        color:
+                                            color_palette["background_color"],
+                                        fontSize: 21.2.h,
+                                        fontWeight: FontWeight.bold),
                                     color: Color(0xff89CFF0),
                                   ),
                                   PieChartSectionData(
-                                    value: Conversion.computePercentageValue(
-                                        widget.recipe
-                                                .nutritionalValue["totalFat"] *
-                                            9,
-                                        widget.recipe
-                                            .nutritionalValue["totalCalories"]),
-                                    title:
-                                        'Fats\n${Conversion.computePercentageValue(widget.recipe.nutritionalValue["totalFat"] * 9, widget.recipe.nutritionalValue["totalCalories"]).toStringAsFixed(2)}%',
-                                    titleStyle: TextStyle(
-                                        color: color_palette["background_color"],
-                                        fontSize: 21.2.h,fontWeight: FontWeight.bold),
-                                    color: color_palette["neutral"]
-                                  ),
+                                      value: Conversion.computePercentageValue(
+                                          widget.recipe.nutritionalValue[
+                                                  "totalFat"] *
+                                              9,
+                                          widget.recipe.nutritionalValue[
+                                              "totalCalories"]),
+                                      title:
+                                          'Fats\n${Conversion.computePercentageValue(widget.recipe.nutritionalValue["totalFat"] * 9, widget.recipe.nutritionalValue["totalCalories"]).toStringAsFixed(2)}%',
+                                      titleStyle: TextStyle(
+                                          color:
+                                              color_palette["background_color"],
+                                          fontSize: 21.2.h,
+                                          fontWeight: FontWeight.bold),
+                                      color: color_palette["neutral"]),
                                   PieChartSectionData(
                                     value: Conversion.computePercentageValue(
                                         widget.recipe.nutritionalValue[
@@ -458,8 +486,10 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                                     title:
                                         'Carbs\n${Conversion.computePercentageValue(widget.recipe.nutritionalValue["totalCarbohydrates"] * 4, widget.recipe.nutritionalValue["totalCalories"]).toStringAsFixed(2)}%',
                                     titleStyle: TextStyle(
-                                        color: color_palette["background_color"],
-                                        fontSize: 21.2.h,fontWeight: FontWeight.bold),
+                                        color:
+                                            color_palette["background_color"],
+                                        fontSize: 21.2.h,
+                                        fontWeight: FontWeight.bold),
                                     color: Color(0xffFAD5A5),
                                   ),
                                 ])),

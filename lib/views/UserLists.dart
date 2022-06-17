@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mybmr/notifiers/UserListNotifier.dart';
-import 'package:mybmr/views/creationMenus/builders/EventBuilder.dart';
+
 import 'package:provider/provider.dart';
 import '../constants/Constants.dart';
 import '../constants/Themes.dart';
 import '../models/Equipment.dart';
-import '../models/Event.dart';
 import '../models/Ingredient.dart';
 import '../models/ShoppingItem.dart';
 import '../notifiers/EquipmentNotifier.dart';
@@ -27,7 +26,7 @@ class UserList extends StatefulWidget {
 
 class _UserListState extends State<UserList> {
   int activeState = 0;
-  List<MyEvent> _events = [];
+
 
   @override
   Widget build(BuildContext context) {
@@ -127,16 +126,7 @@ class _UserListState extends State<UserList> {
                                               activeState = 1;
                                             });
                                           }),
-                                      listOption(
-                                          height: 120.h,
-                                          primaryLabel: "Events",
-                                          secondaryLabel: "${_events.length} Events",
-                                          bgColor: color_palette["overlay"],
-                                          onTap: () {
-                                            setState(() {
-                                              activeState = 2;
-                                            });
-                                          }),
+
                                     ],
                                   ),
                                 )),
@@ -165,8 +155,7 @@ class _UserListState extends State<UserList> {
                               color: color_palette["offWhite"], fontSize: 18.h),
                         ),
                       ),
-                      (activeState == 0) ? taskPage() : (activeState == 1)
-                          ? shoppingPage() : eventsPage()
+                      (activeState == 0) ? taskPage() :  shoppingPage()
                     ],
                   ),
                 )),
@@ -514,81 +503,5 @@ class _UserListState extends State<UserList> {
         ));
   }
 
-  Widget eventsPage(){
-    return Expanded(
-      child: Container(
-        child: NotificationListener<OverscrollIndicatorNotification>(
-            onNotification: (overscroll) {
-              overscroll.disallowIndicator();
-              return;
-            },
-            child: CustomScrollView(
-              slivers: [
-                SliverFillRemaining(
-                    child: Container(
-                      child: Column(
-                        children: [
-                          Expanded(
-                              child: Container(
-                                child: _events.length > 0
-                                    ? Column(
-                                    children: List.generate(_events.length,
-                                            (int idx) {
-                                          return Dismissible(
-                                              key: UniqueKey(),
-                                              confirmDismiss:
-                                                  (DismissDirection direction) async {
-                                                if (direction ==
-                                                    DismissDirection.endToStart) {
-                                                  setState(() {
-                                                    _events.removeAt(idx);
-                                                  });
 
-                                                  return true;
-                                                }
-                                                return false;
-                                              },
-                                              child: Container(
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                    children: [
-                                                    ],
-                                                  )));
-                                        }
-                                      // some widgets here
-                                    ).toList())
-                                    : Container(),
-                              )),
-                          Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: 70.h,
-                              margin: EdgeInsets.fromLTRB(10, 10, 10, 3),
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  Map<String, dynamic> out =
-                                  await Navigator.of(context)
-                                      .push(MaterialPageRoute(builder: (context) {
-                                    return EventBuilder();
-                                  }));
-                                  if (out != null && out.containsKey("value")) {
-                                    _events.add(out["value"]);
-                                    setState(() {});
-                                  }
-                                },
-                                child: Text("Add Event"),
-                                style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15)),
-                                    elevation: 8,
-                                    primary: color_palette["overlay"]),
-                              )),
-                        ],
-                      ),
-                    )),
-              ],
-            )),
-      ),
-    );
-  }
 }
