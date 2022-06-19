@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mybmr/models/AppUser.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +41,9 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
       _usernameController.text = AppUser.instance.userName;
     if (AppUser.instance.aboutUser != null)
       _aboutMeController.text = AppUser.instance.aboutUser;
+    _businessUrlController.text = AppUser.instance.businessUrl;
+    _youtubeUrlController.text = AppUser.instance.youtubeUrl;
+    _tiktokUrlController.text = AppUser.instance.tiktokUrl;
     super.initState();
   }
 
@@ -84,9 +86,9 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                 await FirebaseDB.isUsernameAvailable(username);
               }
               if (isAvailable) {
-                if(websiteUrl.startsWith( "https://"))AppUser.instance.businessUrl = websiteUrl;
-                if(youtubeUrl.startsWith("https://www.youtube.com/watch?v="))AppUser.instance.youtubeUrl = youtubeUrl;
-                if(tiktoktUrl.startsWith( "https://vm.tiktok.com/") || tiktoktUrl.startsWith( "https://www.tiktok.com/") )AppUser.instance.tiktokUrl = tiktoktUrl;
+                if(websiteUrl.startsWith( "https://") || websiteUrl.length == 0)AppUser.instance.businessUrl = websiteUrl;
+                if(youtubeUrl.startsWith("https://www.youtube.com/watch?v=") || youtubeUrl.length == 0)AppUser.instance.youtubeUrl = youtubeUrl;
+                if(tiktoktUrl.startsWith( "https://vm.tiktok.com/") || tiktoktUrl.startsWith( "https://www.tiktok.com/") || tiktoktUrl.length == 0)AppUser.instance.tiktokUrl = tiktoktUrl;
                 String imagePath = await FirebaseDB.updateUserProfile(
                     username: username,
                     aboutMe: aboutMe,
@@ -98,7 +100,7 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                 AppUser.instance.profileImagePath = imagePath;
                 AppUser.instance.userName = username;
                 AppUser.instance.aboutUser = aboutMe;
-
+                Provider.of<UserNotifier>(context,listen: false).refresh();
 
                 Navigator.pop(context);
               } else {

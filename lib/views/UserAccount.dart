@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/Themes.dart';
 import '../constants/messages/en_messages.dart';
 import '../models/AppUser.dart';
+import '../notifiers/UserNotifier.dart';
 import '../services/conversion.dart';
 import 'creationMenus/builders/Profilebuilder.dart';
 
@@ -47,6 +48,7 @@ class _UserAccountState extends State<UserAccount>
   @override
   Widget build(BuildContext context) {
     Provider.of<FavoritesNotifier>(context, listen: true);
+    Provider.of<UserNotifier>(context,listen: true);
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -312,7 +314,7 @@ class _UserAccountState extends State<UserAccount>
                       ))),
             ])),
       ),
-      SliverToBoxAdapter(
+      if(AppUser.instance.hasWebLinks()) SliverToBoxAdapter(
           child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10),
         child: Column(

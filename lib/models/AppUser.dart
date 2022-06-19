@@ -85,6 +85,10 @@ class AppUser{
      numFollowing = 0;
 
   }
+   bool hasWebLinks(){
+    if(youtubeUrl.length > 0 || tiktokUrl.length > 0 || businessUrl.length > 0) return true;
+    return false;
+  }
   void addLikeRecipe(String recipeId){
     if(!likedRecipes.contains(recipeId)) likedRecipes.add(recipeId);
   }

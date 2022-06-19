@@ -20,7 +20,10 @@ class UserNotifier extends ChangeNotifier {
     executingAction = false;
     actionComplete = true;
   }
+  Future<void> refresh() async {
 
+    notifyListeners();
+  }
   Future<void> signInWithGoogle() async {
     executingAction = true;
     actionComplete = false;
