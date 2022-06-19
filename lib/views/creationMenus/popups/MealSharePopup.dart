@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mybmr/models/AppUser.dart';
 import 'package:mybmr/notifiers/MealPlanNotifier.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/models/MealPlan.dart';
@@ -44,27 +45,33 @@ class _MealSharePopupState extends State<MealSharePopup> {
   }
   void addMealPlan()  {
 
-      if (_titleController.value != null &&
-          _titleController.value.text.trim().length > 0 &&
-          _timeController.value != null &&
-          _timeController.value.text.length > 0 &&
-          selectDate != null) {
+      if(AppUser.instance.isUserSignedIn()){
+        if (_titleController.value != null &&
+            _titleController.value.text.trim().length > 0 &&
+            _timeController.value != null &&
+            _timeController.value.text.length > 0 &&
+            selectDate != null) {
 
-        MealPlan mealPlan = MealPlan(
-            title: _titleController.value.text,
-            timeOfDay: _timeController.value.text,
-            date: DateTime(selectDate.year, selectDate.month, selectDate.day) ,
-            recipeId: widget.recipe.id);
-        Provider.of<MealPlanNotifier>(context,listen: false).createMealPlan(mealPlan, widget.recipe);
+          MealPlan mealPlan = MealPlan(
+              title: _titleController.value.text,
+              timeOfDay: _timeController.value.text,
+              date: DateTime(selectDate.year, selectDate.month, selectDate.day) ,
+              recipeId: widget.recipe.id);
+          Provider.of<MealPlanNotifier>(context,listen: false).createMealPlan(mealPlan, widget.recipe);
 
-        FirebaseDB.updateRecipeCounter(widget.recipe.id).whenComplete(() {
-          Navigator.pop(context);
-        });
+          FirebaseDB.updateRecipeCounter(widget.recipe.id).whenComplete(() {
+            Navigator.pop(context);
+          });
 
-      }else{
+        }else{
 
-        CustomToast(en_messages["meal_planner_missing_fields"]);
+          CustomToast(en_messages["meal_planner_missing_fields"]);
+        }
       }
+      else{
+        CustomToast(en_messages["sign_in_required"]);
+      }
+
 
 
 

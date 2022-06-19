@@ -79,6 +79,10 @@ class AppUser{
     _businessUrl = "";
     _tiktokUrl = "";
     _youtubeUrl = "";
+     numCreated = 0;
+     numLiked = 0;
+     numFollowedBy = 0;
+     numFollowing = 0;
 
   }
   void addLikeRecipe(String recipeId){

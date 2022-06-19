@@ -107,7 +107,7 @@ class IngredientNotifier extends ChangeNotifier {
 
 
 
-    FirebaseDB.insertIngredient(ingredient,creatorsId: AppUser.instance.uuid).then((DocumentSnapshot record) {
+    FirebaseDB.insertIngredient(ingredient).then((DocumentSnapshot record) {
       Ingredient newIngredient = Ingredient.fromJson(record.data());
       newIngredient.id = record.id;
       _ingredientList_recentlyUsed.add(newIngredient);

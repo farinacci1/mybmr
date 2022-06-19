@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:mybmr/notifiers/RecipeNotifier.dart';
 import 'package:mybmr/services/AdService.dart';
 import 'package:mybmr/services/AppManager.dart';
+import 'package:mybmr/services/Firebase_db.dart';
 import 'package:mybmr/views/Home.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
             splashIconSize: 230,
             backgroundColor: Colors.black38,
             screenFunction: () async {
+
               SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
                   statusBarColor: Colors.black38,
                   systemNavigationBarColor: Colors.black38,
@@ -77,6 +79,7 @@ class MyApp extends StatelessWidget {
                 DeviceOrientation.portraitDown,
               ]);
               await Firebase.initializeApp();
+
               MobileAds.instance.initialize();
               bool isSupportedAppVersion = await AppManager.isValidAppVersion();
               if (isSupportedAppVersion)

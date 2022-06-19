@@ -67,7 +67,7 @@ class MealPlanNotifier extends ChangeNotifier {
 
   void removePlan(MealPlan plan) {
 
-    FirebaseDB.deleteMealPlan(AppUser.instance.uuid, plan.id).whenComplete((){
+    FirebaseDB.deleteMealPlan(plan.id).whenComplete((){
       this._mealPlans.remove(plan);
       notifyListeners();
     }).catchError((err) {
@@ -79,9 +79,9 @@ class MealPlanNotifier extends ChangeNotifier {
   void getMealPlansFromDB() {
 
       isFetching = true;
-      FirebaseDB.fetchMealPlans(AppUser.instance.uuid).then((
+      FirebaseDB.fetchMealPlans().then((
           QuerySnapshot<Map<String, dynamic>> querySnapshot) {
-        if (querySnapshot.size > 0) {
+        if (querySnapshot != null && querySnapshot.size > 0) {
           this._mealPlans = querySnapshot.docs.map((
               QueryDocumentSnapshot queryDocumentSnapshot) => MealPlan.fromJson(
               queryDocumentSnapshot.data(), queryDocumentSnapshot.id))
@@ -112,7 +112,7 @@ class MealPlanNotifier extends ChangeNotifier {
   void createMealPlan(MealPlan mealPlan, Recipe recipe) {
 
 
-          FirebaseDB.insertMealPlan(AppUser.instance.uuid, mealPlan).then((String planId){
+          FirebaseDB.insertMealPlan(mealPlan).then((String planId){
             this.recipesInMealPlans.add(recipe);
             mealPlan.id = planId;
             this.mealPlans.add(mealPlan);

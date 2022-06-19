@@ -74,6 +74,8 @@ class FavoritesNotifier extends ChangeNotifier {
     outOfMyCreations = false;
     lastCreatedDoc = null;
     lastFavoriteDoc = null;
+    myCurrPage = 0;
+    favCurrPage = 0;
 
   }
 
@@ -88,29 +90,32 @@ class FavoritesNotifier extends ChangeNotifier {
   }
 
   void handleLikeEvent(String recipeId, {Recipe recipe}) {
+    if(AppUser.instance.isUserSignedIn()){
+      if ( !AppUser.instance.likedRecipes.contains(recipe.id)) {
+
+        FirebaseDB.likeRecipe(recipeId, AppUser.instance.uuid).then((_) async {
+          recipe.likedBy.add(AppUser.instance.uuid);
+          _favoriteRecipes.add(recipe);
+          await fetchOwner(recipe.createdBy);
+          AppUser.instance.addLikeRecipe(recipe.id);
+          AppUser.instance.numLiked += 1;
+
+        }).catchError((_){}).whenComplete(() =>    notifyListeners());
+
+      } else {
 
 
-    if ( !AppUser.instance.likedRecipes.contains(recipe.id)) {
 
-      FirebaseDB.likeRecipe(recipeId, AppUser.instance.uuid).then((_) async {
-        recipe.likedBy.add(AppUser.instance.uuid);
-        _favoriteRecipes.add(recipe);
-        await fetchOwner(recipe.createdBy);
-        AppUser.instance.addLikeRecipe(recipe.id);
+        FirebaseDB.unlikeRecipe(recipeId, AppUser.instance.uuid).then((_){
+          recipe.likedBy.remove(AppUser.instance.uuid);
+          _favoriteRecipes.removeWhere((rec) => rec.id == recipeId);
+          AppUser.instance.removeLikedRecipe(recipe.id);
+          AppUser.instance.numLiked -= 1;
+        }).catchError((_){}).whenComplete(() =>    notifyListeners());
 
-      }).catchError((_){}).whenComplete(() =>    notifyListeners());
-
-    } else {
-
-
-
-      FirebaseDB.unlikeRecipe(recipeId, AppUser.instance.uuid).then((_){
-        recipe.likedBy.remove(AppUser.instance.uuid);
-        _favoriteRecipes.removeWhere((rec) => rec.id == recipeId);
-           AppUser.instance.removeLikedRecipe(recipe.id);
-      }).catchError((_){}).whenComplete(() =>    notifyListeners());
-
+      }
     }
+
   }
 
 

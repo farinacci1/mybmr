@@ -25,8 +25,7 @@ class _ReportPopupState extends State<ReportPopup> {
   void reportRecipe(String recipeId, int flagType) {
     if ( AppUser.instance.isUserSignedIn() &&
         !AppUser.instance.reportedRecipesIds.contains(recipeId)) {
-      FirebaseDB.updateRecipeFlags(recipeId, flagType,
-              flaggersId: AppUser.instance.uuid)
+      FirebaseDB.updateRecipeFlags(recipeId, flagType)
           .whenComplete(() {
         AppUser.instance.insertReportedRecipe(recipeId);
         CustomToast(en_messages["report_received"]);

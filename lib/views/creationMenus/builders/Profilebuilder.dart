@@ -88,7 +88,6 @@ class _ProfileBuilderState extends State<ProfileBuilder> {
                 if(youtubeUrl.startsWith("https://www.youtube.com/watch?v="))AppUser.instance.youtubeUrl = youtubeUrl;
                 if(tiktoktUrl.startsWith( "https://vm.tiktok.com/") || tiktoktUrl.startsWith( "https://www.tiktok.com/") )AppUser.instance.tiktokUrl = tiktoktUrl;
                 String imagePath = await FirebaseDB.updateUserProfile(
-                    userId: AppUser.instance.uuid,
                     username: username,
                     aboutMe: aboutMe,
                     profileImage: imageFile,

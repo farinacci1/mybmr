@@ -59,11 +59,11 @@ class UserListNotifier extends ChangeNotifier {
 
   void fetchUserList(){
     isCurrentlyFetching = true;
-    FirebaseDB.fetchUserShoppingList(creatorsId: AppUser.instance.uuid).then((DocumentSnapshot record){
-      _groceryList = ShoppingList.fromJSON(record.data());
+    FirebaseDB.fetchUserShoppingList().then((DocumentSnapshot record){
+      if(record != null) _groceryList = ShoppingList.fromJSON(record.data());
     }).whenComplete(() {
-      FirebaseDB.fetchUserTaskList(creatorsId: AppUser.instance.uuid).then((DocumentSnapshot record) {
-        _taskList = TaskList.fromJSON(record.data());
+      FirebaseDB.fetchUserTaskList().then((DocumentSnapshot record) {
+        if(record != null)_taskList = TaskList.fromJSON(record.data());
       }).whenComplete((){
         isCurrentlyFetching = false;
         notifyListeners();
@@ -77,11 +77,11 @@ class UserListNotifier extends ChangeNotifier {
 
       if(isGroceryDirty){
         isGroceryDirty = false;
-        FirebaseDB.updateShoppingList(_groceryList,creatorsId: AppUser.instance.uuid);
+        FirebaseDB.updateShoppingList(_groceryList);
       }
       if(isTaskDirty){
         isTaskDirty = false;
-        FirebaseDB.updateUserTaskList(_taskList,creatorsId: AppUser.instance.uuid);
+        FirebaseDB.updateUserTaskList(_taskList);
       }
   }
 

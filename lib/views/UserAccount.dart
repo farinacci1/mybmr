@@ -3,10 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mybmr/notifiers/FavoritesNotifier.dart';
 import 'package:mybmr/services/helper.dart';
 import 'package:mybmr/views/RecipePageView.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/Themes.dart';
 import '../constants/messages/en_messages.dart';
@@ -42,7 +46,7 @@ class _UserAccountState extends State<UserAccount>
 
   @override
   Widget build(BuildContext context) {
-
+    Provider.of<FavoritesNotifier>(context, listen: true);
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -73,20 +77,18 @@ class _UserAccountState extends State<UserAccount>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              behavior: HitTestBehavior.translucent,
+                                behavior: HitTestBehavior.translucent,
                                 onTap: () async {
                                   await Navigator.push(context,
                                       MaterialPageRoute(builder: (context) {
-                                        return ProfileBuilder();
-                                      }));
-
+                                    return ProfileBuilder();
+                                  }));
                                 },
-                                child:
-                            Container(
-                              width: 30,
-                              child: Icon(MaterialIcons.more_vert,
-                                  color: color_palette["white"]),
-                            )),
+                                child: Container(
+                                  width: 30,
+                                  child: Icon(MaterialIcons.more_vert,
+                                      color: color_palette["white"]),
+                                )),
                             Text(
                               "My Profile",
                               style: TextStyle(
@@ -144,7 +146,7 @@ class _UserAccountState extends State<UserAccount>
                       alignment: AlignmentDirectional.center,
                       padding: EdgeInsets.only(top: 15, bottom: 10),
                       child: Text(
-                        '@' +AppUser.instance.userName,
+                        '@' + AppUser.instance.userName,
                         style: TextStyle(
                             color: color_palette["white"], fontSize: 28.h),
                       ),
@@ -160,7 +162,6 @@ class _UserAccountState extends State<UserAccount>
                         onTap: (int idx) {
                           setState(() {
                             tabIdx = idx;
-
                           });
                         },
                         tabs: [
@@ -215,7 +216,6 @@ class _UserAccountState extends State<UserAccount>
   }
 
   Widget showAboutPage() {
-
     return CustomScrollView(primary: false, slivers: [
       SliverToBoxAdapter(
         child: Container(
@@ -309,19 +309,101 @@ class _UserAccountState extends State<UserAccount>
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
-                      )))
+                      ))),
             ])),
       ),
+      SliverToBoxAdapter(
+          child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+              alignment: AlignmentDirectional.topStart,
+              child: Text(
+                "Sites",
+                maxLines: 1,
+                style: TextStyle(
+                    fontSize: 24.h,
+                    color: color_palette["background_color"],
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (AppUser.instance.businessUrl != "")
+              Container(
+                  margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                  alignment: AlignmentDirectional.topStart,
+                  child: Linkify(
+                    onOpen: (link) async {
+                      if (await canLaunchUrl(Uri.parse(link.url))) {
+                        await launchUrl(Uri.parse(link.url));
+                      } else {
+                        throw 'Could not launch $link';
+                      }
+                    },
+                    text: "Business: " + AppUser.instance.businessUrl,
+                    style: TextStyle(color: color_palette["background_color"],
+                      fontSize: 22.h,
+                    ),
+                    linkStyle: TextStyle(
+
+                      fontSize: 30.h,
+                    ),
+                  )),
+            if (AppUser.instance.youtubeUrl != "")
+              Container(
+                  margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                  alignment: AlignmentDirectional.topStart,
+                  child: Linkify(
+                    onOpen: (link) async {
+                      if (await canLaunchUrl(Uri.parse(link.url))) {
+                        await launchUrl(Uri.parse(link.url));
+                      } else {
+                        throw 'Could not launch $link';
+                      }
+                    },
+                    text: "Youtube: " + AppUser.instance.youtubeUrl,
+                    style: TextStyle(color: color_palette["background_color"],
+                      fontSize: 22.h,
+                    ),
+                    linkStyle: TextStyle(
+
+                      fontSize: 30.h,
+                    ),
+                  )),
+            if (AppUser.instance.tiktokUrl != "")
+              Container(
+                  margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                  alignment: AlignmentDirectional.topStart,
+                  child: Linkify(
+                    onOpen: (link) async {
+                      if (await canLaunchUrl(Uri.parse(link.url))) {
+                        await launchUrl(Uri.parse(link.url));
+                      } else {
+                        throw 'Could not launch $link';
+                      }
+                    },
+                    text: "Tiktok: " + AppUser.instance.tiktokUrl,
+                    style: TextStyle(color: color_palette["background_color"],
+                      fontSize: 22.h,
+                    ),
+                    linkStyle: TextStyle(
+
+                      fontSize: 30.h,
+                    ),
+                  )),
+          ],
+        ),
+      ))
     ]);
   }
 
   Widget showCreationsPage() {
-
-   return RecipePageView(mode: 1);
+    return RecipePageView(mode: 1);
   }
 
   Widget showFavoritesPage() {
-
     return RecipePageView(mode: 2);
   }
 }

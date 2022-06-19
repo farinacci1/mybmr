@@ -908,7 +908,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
       return RuleConfirmationPopup();
     }));
     if(!AppUser.instance.isUserSignedIn() ){
-      CustomToast("Must be signed in to add recipe");
+      CustomToast(en_messages["sign_in_required"]);
     }
     else if (out != null && out["confirmed"] == true ) {
       Provider.of<FavoritesNotifier>(context, listen: false).addRecipe(recipe);

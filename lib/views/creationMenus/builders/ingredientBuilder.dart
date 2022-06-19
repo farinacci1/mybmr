@@ -6,6 +6,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mybmr/models/AppUser.dart';
 import 'package:mybmr/notifiers/IngredientNotifier.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/services/conversion.dart';
@@ -61,7 +62,10 @@ class _IngredientBuilderState extends State<IngredientBuilder> {
   }
 
   Future<void> createIngredient(Ingredient ingredient) async {
-    if (ingredient != null) {
+    if(!AppUser.instance.isUserSignedIn()){
+      CustomToast(en_messages["sign_in_required"]);
+    }
+    else if (ingredient != null) {
       Map<String, dynamic> out =
           await Navigator.of(context).push(HeroDialogRoute(builder: (context) {
         return RuleConfirmationPopup();

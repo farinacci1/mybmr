@@ -105,14 +105,17 @@ class EquipmentNotifier extends ChangeNotifier {
   }
 
   void createEquipment(Equipment equipment, {isForRecipe = true}) {
-    FirebaseDB.insertEquipment(equipment,creatorsId: AppUser.instance.uuid).then((DocumentSnapshot record) {
-      Equipment newEquipment = Equipment.fromJson(record.data());
-      newEquipment.id = record.id;
-      if(isForRecipe)this.addEquipmentToRecipe(newEquipment);
-      else{
-        this._equipmentList_recentlyUsed.add(newEquipment);
-        notifyListeners();
+    FirebaseDB.insertEquipment(equipment).then((DocumentSnapshot record) {
+      if(record != null){
+          Equipment newEquipment = Equipment.fromJson(record.data());
+          newEquipment.id = record.id;
+          if(isForRecipe)this.addEquipmentToRecipe(newEquipment);
+          else{
+            this._equipmentList_recentlyUsed.add(newEquipment);
+            notifyListeners();
+          }
       }
+
     }).catchError((error) {
       print(error.toString());
     });

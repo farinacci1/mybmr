@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mybmr/models/AppUser.dart';
 import 'package:mybmr/notifiers/EquipmentNotifier.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/services/custom_rect_twenn.dart';
@@ -43,21 +44,26 @@ class _EquipmentPopupState extends State<EquipmentPopup> {
   }
 
   Future<void> createEquipment(String name) async {
-    Equipment equip;
-    if (imageFile == null) {
-      CustomToast(en_messages["equipment_missing_image"]);
-    } else {
-      Map<String, dynamic> out =
-          await Navigator.of(context).push(HeroDialogRoute(builder: (context) {
-        return RuleConfirmationPopup();
-      }));
-      if (out != null && out["confirmed"] == true) {
-        equip = Equipment(name: name, image: imageFile);
-        Provider.of<EquipmentNotifier>(context, listen: false)
-            .createEquipment(equip, isForRecipe: !widget.inShopping);
-        Navigator.pop(context, {"create": true});
+    if(!AppUser.instance.isUserSignedIn()){
+      CustomToast(en_messages["sign_in_required"]);
+    }else{
+      Equipment equip;
+      if (imageFile == null) {
+        CustomToast(en_messages["equipment_missing_image"]);
+      } else {
+        Map<String, dynamic> out =
+        await Navigator.of(context).push(HeroDialogRoute(builder: (context) {
+          return RuleConfirmationPopup();
+        }));
+        if (out != null && out["confirmed"] == true) {
+          equip = Equipment(name: name, image: imageFile);
+          Provider.of<EquipmentNotifier>(context, listen: false)
+              .createEquipment(equip, isForRecipe: !widget.inShopping);
+          Navigator.pop(context, {"create": true});
+        }
       }
     }
+
   }
 
   @override
