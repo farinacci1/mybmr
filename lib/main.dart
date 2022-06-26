@@ -3,6 +3,7 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:mybmr/notifiers/LookupUserNotifier.dart';
 import 'package:mybmr/notifiers/RecipeNotifier.dart';
 import 'package:mybmr/services/AdService.dart';
 import 'package:mybmr/services/AppManager.dart';
@@ -53,6 +54,8 @@ class MyApp extends StatelessWidget {
               create: (_) => FavoritesNotifier()),
           ChangeNotifierProvider<UserListNotifier>(
               create: (_) => UserListNotifier()),
+          ChangeNotifierProvider<LookupUserNotifier>(
+              create: (_) => LookupUserNotifier()),
         ],
         child: MaterialApp(
           title: 'Flutter Demo',

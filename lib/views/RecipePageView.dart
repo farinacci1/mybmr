@@ -10,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:like_button/like_button.dart';
 import 'package:mybmr/notifiers/FavoritesNotifier.dart';
+import 'package:mybmr/notifiers/LookupUserNotifier.dart';
 import 'package:mybmr/notifiers/RecipeNotifier.dart';
 import 'package:mybmr/constants/messages/en_messages.dart';
 import 'package:mybmr/models/AppUser.dart';
@@ -27,6 +28,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../constants/Themes.dart';
 import '../services/helper.dart';
 import '../widgets/BottomMenu.dart';
+import 'ProfileViewer.dart';
 import 'RecipeExpanded.dart';
 import 'creationMenus/builders/RecipeBuilder.dart';
 import 'creationMenus/popups/MealSharePopup.dart';
@@ -85,6 +87,8 @@ class _RecipePageViewState extends State<RecipePageView> {
 
     Provider.of<RecipeNotifier>(context, listen: true);
     Provider.of<FavoritesNotifier>(context, listen: true);
+    Provider.of<LookupUserNotifier>(context, listen: true);
+
     prepopulateAds();
 
     return Container(
@@ -328,6 +332,16 @@ class _RecipePageViewState extends State<RecipePageView> {
               .favoriteRecipes
               .length ~/
           Provider.of<FavoritesNotifier>(context, listen: false).bachSz;
+    else if (widget.mode == 3)
+      numAdsRequired = Provider.of<LookupUserNotifier>(context, listen: false)
+          .usersCreations
+          .length ~/
+          Provider.of<LookupUserNotifier>(context, listen: false).batchSz;
+    else if (widget.mode == 4)
+      numAdsRequired = Provider.of<LookupUserNotifier>(context, listen: false)
+          .favoriteRecipes
+          .length ~/
+          Provider.of<LookupUserNotifier>(context, listen: false).batchSz;
     if (ads.length != numAdsRequired) {
       int missingAds = numAdsRequired - ads.length;
       for (int i = 0; i < missingAds; i++) {
@@ -382,7 +396,20 @@ class _RecipePageViewState extends State<RecipePageView> {
             .favoriteRecipes
             .length -
         1;
-
+    if (widget.mode == 3)
+      canFetchRecipes = Provider.of<LookupUserNotifier>(context, listen: false)
+          .outOfMyCreations;
+    lastPageIndex = Provider.of<LookupUserNotifier>(context, listen: false)
+        .usersCreations
+        .length -
+        1;
+    if (widget.mode == 4)
+      canFetchRecipes = Provider.of<LookupUserNotifier>(context, listen: false)
+          .outOfFavoriteRecipes;
+    lastPageIndex = Provider.of<LookupUserNotifier>(context, listen: false)
+        .favoriteRecipes
+        .length -
+        1;
     if (canFetchRecipes == false && index == lastPageIndex) {
       CustomToast(en_messages["out_of_recipes"]);
     }
@@ -395,6 +422,12 @@ class _RecipePageViewState extends State<RecipePageView> {
       Provider.of<FavoritesNotifier>(context, listen: false).myCurrPage = index;
     if (widget.mode == 2)
       Provider.of<FavoritesNotifier>(context, listen: false).favCurrPage =
+          index;
+    if(widget.mode == 3)
+      Provider.of<LookupUserNotifier>(context, listen: false).creationsCurrPage =
+          index;
+    if(widget.mode == 4)
+      Provider.of<LookupUserNotifier>(context, listen: false).favCurrPage =
           index;
   }
 
@@ -436,6 +469,33 @@ class _RecipePageViewState extends State<RecipePageView> {
         insertAd();
       }
     }
+
+
+    if (widget.mode == 3) {
+      LookupUserNotifier recipeNotifier =
+      Provider.of<LookupUserNotifier>(context, listen: false);
+      int fetchIdx =
+          recipeNotifier.usersCreations.length - (recipeNotifier.batchSz ~/ 2);
+      if (recipeNotifier.currentlyFetchingMyRecipes == false &&
+          recipeNotifier.usersCreations.length % recipeNotifier.batchSz == 0 &&
+          index == fetchIdx) {
+        Provider.of<LookupUserNotifier>(context, listen: false).fetchRecipes(fetchFavorites: false);
+        insertAd();
+      }
+    }
+
+    if (widget.mode == 4) {
+      LookupUserNotifier recipeNotifier =
+      Provider.of<LookupUserNotifier>(context, listen: false);
+      int fetchIdx =
+          recipeNotifier.favoriteRecipes.length - (recipeNotifier.batchSz ~/ 2);
+      if (recipeNotifier.currentlyFetchingFavorites == false &&
+          recipeNotifier.favoriteRecipes.length % recipeNotifier.batchSz == 0 &&
+          index == fetchIdx) {
+        Provider.of<LookupUserNotifier>(context, listen: false).fetchRecipes(fetchFavorites: true);
+        insertAd();
+      }
+    }
   }
 
   void handleRefreshAttempt() {
@@ -449,6 +509,12 @@ class _RecipePageViewState extends State<RecipePageView> {
             .shouldRefresh(isMyRecipes: true);
       if (widget.mode == 2)
         Provider.of<FavoritesNotifier>(context, listen: false)
+            .shouldRefresh(isMyRecipes: false);
+      if (widget.mode == 3)
+        Provider.of<LookupUserNotifier>(context, listen: false)
+            .shouldRefresh(isMyRecipes: true);
+      if (widget.mode == 4)
+        Provider.of<LookupUserNotifier>(context, listen: false)
             .shouldRefresh(isMyRecipes: false);
     }
   }
@@ -466,6 +532,14 @@ class _RecipePageViewState extends State<RecipePageView> {
       count = Provider.of<FavoritesNotifier>(context, listen: false)
           .favoriteRecipes
           .length;
+    if (widget.mode == 3)
+      count = Provider.of<LookupUserNotifier>(context, listen: false)
+          .usersCreations
+          .length;
+    if (widget.mode == 4)
+      count = Provider.of<LookupUserNotifier>(context, listen: false)
+          .favoriteRecipes
+          .length;
     return count;
   }
 
@@ -473,12 +547,18 @@ class _RecipePageViewState extends State<RecipePageView> {
     Recipe recipe = null;
     if (widget.mode == 0)
       recipe =
-          Provider.of<RecipeNotifier>(context, listen: true).recipes[index];
+          Provider.of<RecipeNotifier>(context, listen: false).recipes[index];
     if (widget.mode == 1)
-      recipe = Provider.of<FavoritesNotifier>(context, listen: true)
+      recipe = Provider.of<FavoritesNotifier>(context, listen: false)
           .myCreations[index];
     if (widget.mode == 2)
-      recipe = Provider.of<FavoritesNotifier>(context, listen: true)
+      recipe = Provider.of<FavoritesNotifier>(context, listen: false)
+          .favoriteRecipes[index];
+    if (widget.mode == 3)
+      recipe = Provider.of<LookupUserNotifier>(context, listen: false)
+          .usersCreations[index];
+    if (widget.mode == 4)
+      recipe = Provider.of<LookupUserNotifier>(context, listen: false)
           .favoriteRecipes[index];
     return recipe;
   }
@@ -487,8 +567,10 @@ class _RecipePageViewState extends State<RecipePageView> {
     int sz = 0;
     if (widget.mode == 0)
       sz = Provider.of<RecipeNotifier>(context, listen: false).batchSize;
-    else
+    else if(widget.mode == 1 || widget.mode == 2)
       sz = Provider.of<FavoritesNotifier>(context, listen: false).bachSz;
+    else if(widget.mode == 3 || widget.mode == 4)
+      sz = Provider.of<LookupUserNotifier>(context, listen: false).batchSz;
     return sz;
   }
 
@@ -500,9 +582,18 @@ class _RecipePageViewState extends State<RecipePageView> {
     if (widget.mode == 0)
       return Provider.of<RecipeNotifier>(context, listen: false)
           .posters[creatorsId];
-    else
+    else if(widget.mode == 1)
+      return AppUser.instance;
+    else if(widget.mode == 2)
       return Provider.of<FavoritesNotifier>(context, listen: false)
           .posters[creatorsId];
+    else if(widget.mode == 3)
+      return Provider.of<LookupUserNotifier>(context, listen: false)
+         .lookupUser;
+    else if(widget.mode == 4)
+      return Provider.of<LookupUserNotifier>(context, listen: false)
+          .posters[creatorsId];
+    else return null;
   }
 
   Widget headerBar(Recipe recipe) {
@@ -512,18 +603,33 @@ class _RecipePageViewState extends State<RecipePageView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: () {
-                /*
+                if(widget.mode == 0 )
+                  Provider.of<LookupUserNotifier>(context,listen: false).lookupUser =  Provider.of<RecipeNotifier>(context, listen: false)
+                .posters[recipe.createdBy];
+                else if( widget.mode == 1)
+                  Provider.of<LookupUserNotifier>(context,listen: false).lookupUser = AppUser.instance;
+
+                else if( widget.mode == 2)
+                  Provider.of<LookupUserNotifier>(context,listen: false).lookupUser =  Provider.of<FavoritesNotifier>(context, listen: false).
+                  posters[recipe.createdBy];
+
+
+                Provider.of<LookupUserNotifier>(context,listen: false).shouldRefresh(isMyRecipes: true);
+                Provider.of<LookupUserNotifier>(context,listen: false).shouldRefresh(isMyRecipes: false);
+
+                if(widget.mode ==0 || widget.mode == 1 || widget.mode == 2)
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProfileViewer(
-                              userId: recipe.createdBy,
-                            )));
-                            */
+                context,
+                MaterialPageRoute(
+                builder: (context) => ProfileViewer(
+                appUser:   Provider.of<LookupUserNotifier>(context,listen: false).lookupUser
+                )));
 
               },
               child: Container(
+                color: Colors.transparent,
                   child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

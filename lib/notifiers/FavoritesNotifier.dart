@@ -82,6 +82,7 @@ class FavoritesNotifier extends ChangeNotifier {
   Future<bool> fetchOwner(String ownerId) async {
     DocumentSnapshot documentSnapshot = await FirebaseDB.fetchUserById(ownerId);
     AppUser appUser =AppUser.fromJSON(documentSnapshot.data());
+    appUser.uuid = ownerId;
     posters.update(ownerId,
             (value) => appUser,
         ifAbsent: () =>appUser
@@ -192,7 +193,7 @@ class FavoritesNotifier extends ChangeNotifier {
           if(queryDocumentSnapshot.docs.length < bachSz)outOfFavoriteRecipes = true;
         }
       }).whenComplete(() {
-        currentlyFetchingMyRecipes = false;
+        currentlyFetchingFavorites = false;
         notifyListeners();
       });
     }
@@ -207,7 +208,6 @@ class FavoritesNotifier extends ChangeNotifier {
                 recipeRecords: queryDocumentSnapshot.data(),
                 recipeId: queryDocumentSnapshot.id);
             _myCreations.add(fetchedRecipe);
-            await fetchOwner(fetchedRecipe.createdBy);
             if(fetchedRecipe.likedBy.contains(AppUser.instance.uuid) )AppUser.instance.addLikeRecipe(fetchedRecipe.id);
 
 

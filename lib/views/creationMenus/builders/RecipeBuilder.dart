@@ -139,6 +139,7 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                   icon: Icon(MaterialIcons.send),
                 onPressed: ()
                 {
+
                   String title = _titleController.value.text ?? "";
                   title = title.trim();
                   title = title.replaceAll(RegExp('\\s+'), " ");

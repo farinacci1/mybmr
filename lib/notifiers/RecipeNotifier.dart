@@ -59,6 +59,7 @@ class RecipeNotifier extends ChangeNotifier {
   Future<bool> fetchOwner(String ownerId) async {
     DocumentSnapshot documentSnapshot = await FirebaseDB.fetchUserById(ownerId);
     AppUser appUser =AppUser.fromJSON(documentSnapshot.data());
+    appUser.uuid = ownerId;
     posters.update(ownerId,
             (value) => appUser,
             ifAbsent: () =>appUser

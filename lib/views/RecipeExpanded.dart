@@ -218,34 +218,15 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                                         margin: EdgeInsets.only(right: 10),
                                         child: Column(
                                           children: [
-                                            Container(
-                                                width: 53.h,
-                                                height: 53.h,
-                                                decoration: BoxDecoration(
-                                                    color: color_palette[
-                                                        "text_color_dark"],
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                      Radius.circular(53.h / 2),
-                                                    ),
-                                                    image: (ingredient ==
-                                                                null ||
-                                                            ingredient
-                                                                    .ingredientImageFromDB ==
-                                                                null ||
-                                                            ingredient
-                                                                    .ingredientImageFromDB
-                                                                    .length <=
-                                                                0)
-                                                        ? DecorationImage(
-                                                            image: AssetImage(
-                                                                "assets/images/BMRLogo.png"),
-                                                            fit: BoxFit.fill)
-                                                        : DecorationImage(
-                                                            image: NetworkImage(
-                                                                ingredient
-                                                                    .ingredientImageFromDB),
-                                                            fit: BoxFit.fill))),
+                                            buildImage(
+                                              ingredient
+                                                  .ingredientImageFromDB,
+                                              width: 53.h,
+                                              height: 53.h,
+                                              wrapperWidth: 53.h,
+                                              boxFit: BoxFit.fill,
+                                              radius: BorderRadius.circular(53.h),
+                                            ),
                                             Text(
                                               "${ingredient.ingredientName}",
                                               maxLines: 1,
@@ -304,33 +285,16 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                                             EdgeInsets.only(top: 10, right: 10),
                                         child: Column(
                                           children: [
-                                            Container(
-                                                width: 53.h,
-                                                height: 53.h,
-                                                decoration: BoxDecoration(
-                                                    color: color_palette[
-                                                        "background_color"],
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                      Radius.circular(53.h / 2),
-                                                    ),
-                                                    image: (equipment == null ||
-                                                            equipment
-                                                                    .equipmentImageFromDb ==
-                                                                null ||
-                                                            equipment
-                                                                    .equipmentImageFromDb
-                                                                    .length <=
-                                                                0)
-                                                        ? DecorationImage(
-                                                            image: AssetImage(
-                                                                "assets/images/BMRLogo.png"),
-                                                            fit: BoxFit.fill)
-                                                        : DecorationImage(
-                                                            image: NetworkImage(
-                                                                equipment
-                                                                    .equipmentImageFromDb),
-                                                            fit: BoxFit.fill))),
+                                            buildImage(
+                                              equipment
+                                                  .equipmentImageFromDb,
+                                              width: 53.h,
+                                              height: 53.h,
+                                              wrapperWidth: 53.h,
+                                              boxFit: BoxFit.fill,
+                                              radius: BorderRadius.circular(53.h),
+                                            ),
+
                                             Text(
                                               "${equipment.name}",
                                               maxLines: 1,

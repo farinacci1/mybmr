@@ -1,14 +1,12 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mybmr/notifiers/FavoritesNotifier.dart';
+import 'package:mybmr/notifiers/LookupUserNotifier.dart';
+
 import 'package:mybmr/services/helper.dart';
 import 'package:mybmr/views/RecipePageView.dart';
-import 'package:mybmr/views/UserSearch.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,26 +14,30 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/Themes.dart';
 import '../constants/messages/en_messages.dart';
 import '../models/AppUser.dart';
-import '../notifiers/UserNotifier.dart';
-import '../services/conversion.dart';
-import 'creationMenus/builders/Profilebuilder.dart';
 
-class UserAccount extends StatefulWidget {
+import '../services/conversion.dart';
+
+
+class ProfileViewer extends StatefulWidget {
+  final AppUser appUser;
+
+  const ProfileViewer({Key key, @required this.appUser}) : super(key: key);
   @override
-  _UserAccountState createState() => _UserAccountState();
+  _ProfileViewerState createState() => _ProfileViewerState();
 }
 
-class _UserAccountState extends State<UserAccount>
+class _ProfileViewerState extends State<ProfileViewer>
     with SingleTickerProviderStateMixin {
-  File imageFile;
   TabController _tabController;
   int tabIdx = 0;
   final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
+
+
     super.initState();
   }
 
@@ -48,8 +50,7 @@ class _UserAccountState extends State<UserAccount>
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<FavoritesNotifier>(context, listen: true);
-    Provider.of<UserNotifier>(context,listen: true);
+    Provider.of<LookupUserNotifier>(context, listen: true);
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -65,100 +66,58 @@ class _UserAccountState extends State<UserAccount>
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: color_palette["background_color"],
           ),
-          toolbarHeight: 0.0,
+          title: Text("Viewing Profile",
+            style: TextStyle(
+                fontSize: 40.h,
+                color: color_palette["white"]),
+          ),
           bottom: PreferredSize(
               preferredSize: Size.fromHeight(325.h),
               child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 30),
-                      alignment: AlignmentDirectional.center,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () async {
-                                  await Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) {
-                                    return ProfileBuilder();
-                                  }));
-                                },
-                                child: Container(
-                                  width: 30,
-                                  child: Icon(MaterialIcons.more_vert,
-                                      color: color_palette["white"]),
-                                )),
-                            Text(
-                              "My Profile",
-                              style: TextStyle(
-                                  fontSize: 40.h,
-                                  color: color_palette["white"]),
-                            ),
-                      GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () async {
-                            await Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                                  return UserSearch();
-                                }));
-                          },
-                          child:
-                          Container(
-                              width: 30,
-                              child: Icon(MaterialIcons.search,
-                                  color: color_palette["white"]),
-                            )),
-                          ]),
-                    ),
+
                     Container(
                         height: 105.h,
                         width: 105.h,
                         decoration: BoxDecoration(
                             color: color_palette["overlay"],
                             borderRadius: BorderRadius.circular(105.h / 2)),
-                        child: imageFile != null
-                            ? CircleAvatar(
-                                backgroundImage: FileImage(imageFile),
-                                radius: 105.h,
+                        child:  widget.appUser.profileImagePath != null
+                            ? buildImage(
+                          widget.appUser.profileImagePath,
+                          height: 105.h,
+                          width: 105.h,
+                          boxFit: BoxFit.cover,
+                          radius: BorderRadius.circular(105.h),
+                        )
+                            : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment:
+                            CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo,
+                                size: 47.5.h,
+                                color: color_palette["white"],
+                              ),
+                              Container(
+                                height: 2,
+                              ),
+                              Text(
+                                en_messages["photo_label"],
+                                style: TextStyle(
+                                    color: color_palette["white"],
+                                    fontSize: 17.225.h),
                               )
-                            : AppUser.instance.profileImagePath != null
-                                ? buildImage(
-                                    AppUser.instance.profileImagePath,
-                                    height: 105.h,
-                                    width: 105.h,
-                                    boxFit: BoxFit.cover,
-                                    radius: BorderRadius.circular(105.h),
-                                  )
-                                : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                        Icon(
-                                          Icons.add_a_photo,
-                                          size: 47.5.h,
-                                          color: color_palette["white"],
-                                        ),
-                                        Container(
-                                          height: 2,
-                                        ),
-                                        Text(
-                                          en_messages["photo_label"],
-                                          style: TextStyle(
-                                              color: color_palette["white"],
-                                              fontSize: 17.225.h),
-                                        )
-                                      ])),
+                            ])),
                     Container(
                       width: MediaQuery.of(context).size.width,
                       alignment: AlignmentDirectional.center,
                       padding: EdgeInsets.only(top: 15, bottom: 10),
                       child: Text(
-                        '@' + AppUser.instance.userName,
+                        '@' + widget.appUser.userName,
                         style: TextStyle(
                             color: color_palette["white"], fontSize: 28.h),
                       ),
@@ -252,7 +211,7 @@ class _UserAccountState extends State<UserAccount>
                   margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
                   alignment: AlignmentDirectional.topStart,
                   child: Text(
-                    AppUser.instance.aboutUser ?? "",
+                    widget.appUser.aboutUser ?? "",
                     style: TextStyle(
                         fontSize: 28.h,
                         color: color_palette["background_color"]),
@@ -289,7 +248,7 @@ class _UserAccountState extends State<UserAccount>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Created\n${Conversion.nFormatter(AppUser.instance.numCreated ?? 0, 1)}",
+                            "Created\n${Conversion.nFormatter(widget.appUser.numCreated ?? 0, 1)}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 26.h,
@@ -297,7 +256,7 @@ class _UserAccountState extends State<UserAccount>
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "Liked\n${Conversion.nFormatter(AppUser.instance.numLiked ?? 0, 1)}",
+                            "Liked\n${Conversion.nFormatter(widget.appUser.numLiked ?? 0, 1)}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 26.h,
@@ -305,7 +264,7 @@ class _UserAccountState extends State<UserAccount>
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "Followers\n${Conversion.nFormatter(AppUser.instance.numFollowedBy ?? 0, 1)}",
+                            "Followers\n${Conversion.nFormatter(widget.appUser.numFollowedBy ?? 0, 1)}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 26.h,
@@ -313,7 +272,7 @@ class _UserAccountState extends State<UserAccount>
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "Following\n${Conversion.nFormatter(AppUser.instance.numFollowing ?? 0, 1)}",
+                            "Following\n${Conversion.nFormatter(widget.appUser.numFollowing ?? 0, 1)}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 26.h,
@@ -324,98 +283,98 @@ class _UserAccountState extends State<UserAccount>
                       ))),
             ])),
       ),
-      if(AppUser.instance.hasWebLinks()) SliverToBoxAdapter(
+      if(widget.appUser.hasWebLinks()) SliverToBoxAdapter(
           child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-              alignment: AlignmentDirectional.topStart,
-              child: Text(
-                "Sites",
-                maxLines: 1,
-                style: TextStyle(
-                    fontSize: 24.h,
-                    color: color_palette["background_color"],
-                    fontWeight: FontWeight.bold),
-              ),
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  alignment: AlignmentDirectional.topStart,
+                  child: Text(
+                    "Sites",
+                    maxLines: 1,
+                    style: TextStyle(
+                        fontSize: 24.h,
+                        color: color_palette["background_color"],
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                if (widget.appUser.businessUrl != "")
+                  Container(
+                      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                      alignment: AlignmentDirectional.topStart,
+                      child: Linkify(
+                        onOpen: (link) async {
+                          if (await canLaunchUrl(Uri.parse(link.url))) {
+                            await launchUrl(Uri.parse(link.url));
+                          } else {
+                            throw 'Could not launch $link';
+                          }
+                        },
+                        text: "Business: " + widget.appUser.businessUrl,
+                        style: TextStyle(color: color_palette["background_color"],
+                          fontSize: 22.h,
+                        ),
+                        linkStyle: TextStyle(
+
+                          fontSize: 30.h,
+                        ),
+                      )),
+                if (widget.appUser.youtubeUrl != "")
+                  Container(
+                      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                      alignment: AlignmentDirectional.topStart,
+                      child: Linkify(
+                        onOpen: (link) async {
+                          if (await canLaunchUrl(Uri.parse(link.url))) {
+                            await launchUrl(Uri.parse(link.url));
+                          } else {
+                            throw 'Could not launch $link';
+                          }
+                        },
+                        text: "Youtube: " + widget.appUser.youtubeUrl,
+                        style: TextStyle(color: color_palette["background_color"],
+                          fontSize: 22.h,
+                        ),
+                        linkStyle: TextStyle(
+
+                          fontSize: 30.h,
+                        ),
+                      )),
+                if (widget.appUser.tiktokUrl != "")
+                  Container(
+                      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                      alignment: AlignmentDirectional.topStart,
+                      child: Linkify(
+                        onOpen: (link) async {
+                          if (await canLaunchUrl(Uri.parse(link.url))) {
+                            await launchUrl(Uri.parse(link.url));
+                          } else {
+                            throw 'Could not launch $link';
+                          }
+                        },
+                        text: "Tiktok: " + widget.appUser.tiktokUrl,
+                        style: TextStyle(color: color_palette["background_color"],
+                          fontSize: 22.h,
+                        ),
+                        linkStyle: TextStyle(
+
+                          fontSize: 30.h,
+                        ),
+                      )),
+              ],
             ),
-            if (AppUser.instance.businessUrl != "")
-              Container(
-                  margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
-                  alignment: AlignmentDirectional.topStart,
-                  child: Linkify(
-                    onOpen: (link) async {
-                      if (await canLaunchUrl(Uri.parse(link.url))) {
-                        await launchUrl(Uri.parse(link.url));
-                      } else {
-                        throw 'Could not launch $link';
-                      }
-                    },
-                    text: "Business: " + AppUser.instance.businessUrl,
-                    style: TextStyle(color: color_palette["background_color"],
-                      fontSize: 22.h,
-                    ),
-                    linkStyle: TextStyle(
-
-                      fontSize: 30.h,
-                    ),
-                  )),
-            if (AppUser.instance.youtubeUrl != "")
-              Container(
-                  margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
-                  alignment: AlignmentDirectional.topStart,
-                  child: Linkify(
-                    onOpen: (link) async {
-                      if (await canLaunchUrl(Uri.parse(link.url))) {
-                        await launchUrl(Uri.parse(link.url));
-                      } else {
-                        throw 'Could not launch $link';
-                      }
-                    },
-                    text: "Youtube: " + AppUser.instance.youtubeUrl,
-                    style: TextStyle(color: color_palette["background_color"],
-                      fontSize: 22.h,
-                    ),
-                    linkStyle: TextStyle(
-
-                      fontSize: 30.h,
-                    ),
-                  )),
-            if (AppUser.instance.tiktokUrl != "")
-              Container(
-                  margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
-                  alignment: AlignmentDirectional.topStart,
-                  child: Linkify(
-                    onOpen: (link) async {
-                      if (await canLaunchUrl(Uri.parse(link.url))) {
-                        await launchUrl(Uri.parse(link.url));
-                      } else {
-                        throw 'Could not launch $link';
-                      }
-                    },
-                    text: "Tiktok: " + AppUser.instance.tiktokUrl,
-                    style: TextStyle(color: color_palette["background_color"],
-                      fontSize: 22.h,
-                    ),
-                    linkStyle: TextStyle(
-
-                      fontSize: 30.h,
-                    ),
-                  )),
-          ],
-        ),
-      ))
+          ))
     ]);
   }
 
   Widget showCreationsPage() {
-    return RecipePageView(mode: 1);
+    return RecipePageView(mode: 3);
   }
 
   Widget showFavoritesPage() {
-    return RecipePageView(mode: 2);
+    return RecipePageView(mode: 4);
   }
 }
