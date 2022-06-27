@@ -1,11 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mybmr/notifiers/LookupUserNotifier.dart';
 
 import 'package:mybmr/services/helper.dart';
+import 'package:mybmr/services/toast.dart';
 import 'package:mybmr/views/RecipePageView.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -16,7 +18,6 @@ import '../constants/messages/en_messages.dart';
 import '../models/AppUser.dart';
 
 import '../services/conversion.dart';
-
 
 class ProfileViewer extends StatefulWidget {
   final AppUser appUser;
@@ -31,12 +32,11 @@ class _ProfileViewerState extends State<ProfileViewer>
   TabController _tabController;
   int tabIdx = 0;
   final RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     _tabController = TabController(length: 3, vsync: this);
-
 
     super.initState();
   }
@@ -66,60 +66,69 @@ class _ProfileViewerState extends State<ProfileViewer>
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: color_palette["background_color"],
           ),
-          title: Text("Viewing Profile",
-            style: TextStyle(
-                fontSize: 40.h,
-                color: color_palette["white"]),
+          title: Text(
+            "Viewing Profile",
+            style: TextStyle(fontSize: 40.h, color: color_palette["white"]),
           ),
+          actions: [
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                  padding: EdgeInsets.only(right: 15),
+                  child: Icon(
+                    AntDesign.addusergroup,
+                    size: 38.h,
+                  )),
+            )
+          ],
           bottom: PreferredSize(
               preferredSize: Size.fromHeight(325.h),
               child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-
                     Container(
                         height: 105.h,
                         width: 105.h,
                         decoration: BoxDecoration(
                             color: color_palette["overlay"],
                             borderRadius: BorderRadius.circular(105.h / 2)),
-                        child:  widget.appUser.profileImagePath != null
-                            ? buildImage(
-                          widget.appUser.profileImagePath,
-                          height: 105.h,
-                          width: 105.h,
-                          boxFit: BoxFit.cover,
-                          radius: BorderRadius.circular(105.h),
-                        )
-                            : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add_a_photo,
-                                size: 47.5.h,
-                                color: color_palette["white"],
-                              ),
-                              Container(
-                                height: 2,
-                              ),
-                              Text(
-                                en_messages["photo_label"],
-                                style: TextStyle(
-                                    color: color_palette["white"],
-                                    fontSize: 17.225.h),
-                              )
-                            ])),
+                        child: (widget.appUser.profileImagePath == null ||
+                                widget.appUser.profileImagePath == "")
+                            ? Container(
+                                width: 105.h,
+                                height: 105.h,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(60.h),
+                                    color: Color(0XFF6D6D64)),
+                                child: Icon(
+                                  FontAwesomeIcons.userAstronaut,
+                                  color: color_palette["white"],
+                                  size: 30.h,
+                                ))
+                            : buildImage(
+                                widget.appUser.profileImagePath,
+                                height: 105.h,
+                                width: 105.h,
+                                boxFit: BoxFit.cover,
+                                radius: BorderRadius.circular(105.h),
+                              )),
                     Container(
                       width: MediaQuery.of(context).size.width,
                       alignment: AlignmentDirectional.center,
                       padding: EdgeInsets.only(top: 15, bottom: 10),
-                      child: Text(
+                      child: SelectableText(
                         '@' + widget.appUser.userName,
                         style: TextStyle(
                             color: color_palette["white"], fontSize: 28.h),
+                        onTap: () {
+                          Clipboard.setData(
+                                  ClipboardData(text: widget.appUser.userName))
+                              .then((_) {
+                            CustomToast(
+                                "Username has been copied to clipboard.");
+                          });
+                        },
                       ),
                     ),
                     Container(
@@ -283,90 +292,91 @@ class _ProfileViewerState extends State<ProfileViewer>
                       ))),
             ])),
       ),
-      if(widget.appUser.hasWebLinks()) SliverToBoxAdapter(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                  alignment: AlignmentDirectional.topStart,
-                  child: Text(
-                    "Sites",
-                    maxLines: 1,
-                    style: TextStyle(
-                        fontSize: 24.h,
-                        color: color_palette["background_color"],
-                        fontWeight: FontWeight.bold),
-                  ),
+      if (widget.appUser.hasWebLinks())
+        SliverToBoxAdapter(
+            child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                alignment: AlignmentDirectional.topStart,
+                child: Text(
+                  "Sites",
+                  maxLines: 1,
+                  style: TextStyle(
+                      fontSize: 24.h,
+                      color: color_palette["background_color"],
+                      fontWeight: FontWeight.bold),
                 ),
-                if (widget.appUser.businessUrl != "")
-                  Container(
-                      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
-                      alignment: AlignmentDirectional.topStart,
-                      child: Linkify(
-                        onOpen: (link) async {
-                          if (await canLaunchUrl(Uri.parse(link.url))) {
-                            await launchUrl(Uri.parse(link.url));
-                          } else {
-                            throw 'Could not launch $link';
-                          }
-                        },
-                        text: "Business: " + widget.appUser.businessUrl,
-                        style: TextStyle(color: color_palette["background_color"],
-                          fontSize: 22.h,
-                        ),
-                        linkStyle: TextStyle(
-
-                          fontSize: 30.h,
-                        ),
-                      )),
-                if (widget.appUser.youtubeUrl != "")
-                  Container(
-                      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
-                      alignment: AlignmentDirectional.topStart,
-                      child: Linkify(
-                        onOpen: (link) async {
-                          if (await canLaunchUrl(Uri.parse(link.url))) {
-                            await launchUrl(Uri.parse(link.url));
-                          } else {
-                            throw 'Could not launch $link';
-                          }
-                        },
-                        text: "Youtube: " + widget.appUser.youtubeUrl,
-                        style: TextStyle(color: color_palette["background_color"],
-                          fontSize: 22.h,
-                        ),
-                        linkStyle: TextStyle(
-
-                          fontSize: 30.h,
-                        ),
-                      )),
-                if (widget.appUser.tiktokUrl != "")
-                  Container(
-                      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
-                      alignment: AlignmentDirectional.topStart,
-                      child: Linkify(
-                        onOpen: (link) async {
-                          if (await canLaunchUrl(Uri.parse(link.url))) {
-                            await launchUrl(Uri.parse(link.url));
-                          } else {
-                            throw 'Could not launch $link';
-                          }
-                        },
-                        text: "Tiktok: " + widget.appUser.tiktokUrl,
-                        style: TextStyle(color: color_palette["background_color"],
-                          fontSize: 22.h,
-                        ),
-                        linkStyle: TextStyle(
-
-                          fontSize: 30.h,
-                        ),
-                      )),
-              ],
-            ),
-          ))
+              ),
+              if (widget.appUser.businessUrl != "")
+                Container(
+                    margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                    alignment: AlignmentDirectional.topStart,
+                    child: Linkify(
+                      onOpen: (link) async {
+                        if (await canLaunchUrl(Uri.parse(link.url))) {
+                          await launchUrl(Uri.parse(link.url));
+                        } else {
+                          throw 'Could not launch $link';
+                        }
+                      },
+                      text: "Business: " + widget.appUser.businessUrl,
+                      style: TextStyle(
+                        color: color_palette["background_color"],
+                        fontSize: 22.h,
+                      ),
+                      linkStyle: TextStyle(
+                        fontSize: 30.h,
+                      ),
+                    )),
+              if (widget.appUser.youtubeUrl != "")
+                Container(
+                    margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                    alignment: AlignmentDirectional.topStart,
+                    child: Linkify(
+                      onOpen: (link) async {
+                        if (await canLaunchUrl(Uri.parse(link.url))) {
+                          await launchUrl(Uri.parse(link.url));
+                        } else {
+                          throw 'Could not launch $link';
+                        }
+                      },
+                      text: "Youtube: " + widget.appUser.youtubeUrl,
+                      style: TextStyle(
+                        color: color_palette["background_color"],
+                        fontSize: 22.h,
+                      ),
+                      linkStyle: TextStyle(
+                        fontSize: 30.h,
+                      ),
+                    )),
+              if (widget.appUser.tiktokUrl != "")
+                Container(
+                    margin: EdgeInsets.symmetric(vertical: 2, horizontal: 14),
+                    alignment: AlignmentDirectional.topStart,
+                    child: Linkify(
+                      onOpen: (link) async {
+                        if (await canLaunchUrl(Uri.parse(link.url))) {
+                          await launchUrl(Uri.parse(link.url));
+                        } else {
+                          throw 'Could not launch $link';
+                        }
+                      },
+                      text: "Tiktok: " + widget.appUser.tiktokUrl,
+                      style: TextStyle(
+                        color: color_palette["background_color"],
+                        fontSize: 22.h,
+                      ),
+                      linkStyle: TextStyle(
+                        fontSize: 30.h,
+                      ),
+                    )),
+            ],
+          ),
+        ))
     ]);
   }
 

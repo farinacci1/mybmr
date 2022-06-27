@@ -27,27 +27,30 @@ class FirebaseDB {
   static Future<DocumentSnapshot> createUserIfNotExists(String uid) async {
     CollectionReference users = FirebaseFirestore.instance.collection('Users');
     DocumentSnapshot ds = await users.doc(uid).get();
-    if(!ds.exists){
+    if (!ds.exists) {
       await users.doc(uid).set({
-        "reportedRecipesIds":[],
+        "reportedRecipesIds": [],
         "userName": uid,
-        "profileImage":null,
-        "aboutUser" : "",
-        "businessUrl" : "",
-        "youtubeUrl" : "",
-        "tiktokUrl" : "",
-        "following" : [],
-        "followedBy" : 0,
+        "profileImage": null,
+        "aboutUser": "",
+        "businessUrl": "",
+        "youtubeUrl": "",
+        "tiktokUrl": "",
+        "following": [],
+        "followedBy": 0,
         "numCreated": 0,
-        "numLiked" : 0
-
+        "numLiked": 0
       });
-      await FirebaseFirestore.instance.collection('Aggregate').doc('Stats').collection('Users').doc('stats').update({
-        "count" : FieldValue.increment(1)
-      });
+      await FirebaseFirestore.instance
+          .collection('Aggregate')
+          .doc('Stats')
+          .collection('Users')
+          .doc('stats')
+          .update({"count": FieldValue.increment(1)});
     }
     return ds;
   }
+
   static Future<bool> isUsernameAvailable(String username) async {
     final result = await FirebaseFirestore.instance
         .collection('Users')
@@ -56,77 +59,85 @@ class FirebaseDB {
     return result.size == 0;
   }
 
-
-
-  static Future<void> _addToCreations(String recipeId,String userId) async {
-    if(AppUser.instance.isUserSignedIn()){
-      await FirebaseFirestore.instance.collection('Users').doc(userId).update({
-        "numCreated" : FieldValue.increment(1)
-      });
+  static Future<void> _addToCreations(String recipeId, String userId) async {
+    if (AppUser.instance.isUserSignedIn()) {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .update({"numCreated": FieldValue.increment(1)});
     }
-
   }
-  static Future<void> likeRecipe(String recipeId,String userId) async {
-    if(AppUser.instance.isUserSignedIn()){
-      await FirebaseFirestore.instance.collection('Recipes').doc(recipeId).update({
-        "likedBy" : FieldValue.arrayUnion([userId]),
-        "numLikes" : FieldValue.increment(1)
+
+  static Future<void> likeRecipe(String recipeId, String userId) async {
+    if (AppUser.instance.isUserSignedIn()) {
+      await FirebaseFirestore.instance
+          .collection('Recipes')
+          .doc(recipeId)
+          .update({
+        "likedBy": FieldValue.arrayUnion([userId]),
+        "numLikes": FieldValue.increment(1)
       });
-      await FirebaseFirestore.instance.collection('Users').doc(userId).update(
-          {
-            "numLiked" :FieldValue.increment(1)
-          });
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .update({"numLiked": FieldValue.increment(1)});
     }
-
   }
-  static Future<void> unlikeRecipe(String recipeId,String userId) async {
-    if(AppUser.instance.isUserSignedIn()){
+
+  static Future<void> unlikeRecipe(String recipeId, String userId) async {
+    if (AppUser.instance.isUserSignedIn()) {
       FirebaseFirestore.instance.collection('Recipes').doc(recipeId).update({
-        "numLikes" : FieldValue.increment(-1),
-        "likedBy" : FieldValue.arrayRemove([userId])
+        "numLikes": FieldValue.increment(-1),
+        "likedBy": FieldValue.arrayRemove([userId])
       });
-      await FirebaseFirestore.instance.collection('Users').doc(userId).update(
-          {
-            "numLiked" :FieldValue.increment(-1)
-          });
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .update({"numLiked": FieldValue.increment(-1)});
     }
   }
-
-
 
   static Future<DocumentSnapshot> insertIngredient(
-      Ingredient ingredient,) async {
-    if(AppUser.instance.isUserSignedIn()){
+    Ingredient ingredient,
+  ) async {
+    if (AppUser.instance.isUserSignedIn()) {
       int createdOn = DateTime.now().millisecondsSinceEpoch;
       CollectionReference ingredients =
-      FirebaseFirestore.instance.collection('Ingredients');
+          FirebaseFirestore.instance.collection('Ingredients');
       Map<String, dynamic> ingredMap = ingredient.toJSON();
       String imagePath = await _uploadImage(ingredMap["IngredientImage"]);
-      String ingredientName = ingredMap["IngredientName"].toString().toLowerCase();
+      String ingredientName =
+          ingredMap["IngredientName"].toString().toLowerCase();
       ingredMap.remove("IngredientImage");
       ingredMap.update("IngredientName", (value) => ingredientName);
       ingredMap.addAll({
-        "PossibleNames":Conversion.tokenizeByWordChar(ingredMap["IngredientName"]),
+        "PossibleNames":
+            Conversion.tokenizeByWordChar(ingredMap["IngredientName"]),
         "IngredientImage": imagePath,
         "createdOn": createdOn,
         "usedIn": 0,
         "createdBy": AppUser.instance.uuid
       });
       DocumentReference ref = await ingredients.add(ingredMap);
-      await FirebaseFirestore.instance.collection('Aggregate').doc('Stats').collection('Ingredients').doc('stats').update({
-        "count" : FieldValue.increment(1)
-      });
+      await FirebaseFirestore.instance
+          .collection('Aggregate')
+          .doc('Stats')
+          .collection('Ingredients')
+          .doc('stats')
+          .update({"count": FieldValue.increment(1)});
       return ref.get();
     }
     return null;
   }
+
   static Future<String> insertRecipe(Recipe recipe, {String creatorsId}) async {
-    if(AppUser.instance.isUserSignedIn()){
+    if (AppUser.instance.isUserSignedIn()) {
       Map<String, dynamic> recipeMap = recipe.toJSON();
       CollectionReference recipes =
-      FirebaseFirestore.instance.collection('Recipes');
+          FirebaseFirestore.instance.collection('Recipes');
       String imagePath = await _uploadImage(recipeMap["recipeImage"]);
-      List<String> keywords = Conversion.tokenizeByPermutations(recipeMap["recipeName"]);
+      List<String> keywords =
+          Conversion.tokenizeByPermutations(recipeMap["recipeName"]);
       recipeMap.remove("recipeImage");
       int createdOn = DateTime.now().millisecondsSinceEpoch;
       recipeMap.addAll({
@@ -140,22 +151,25 @@ class FirebaseDB {
         "invalidRecipe_Flag": 0,
         "adminDown": false,
         "createdBy": creatorsId,
-        "caloriesPerServ" : recipeMap["totalCalories"] / recipeMap["peopleServed"],
-        "updatedOn" : createdOn,
-        "numLikes" : 0,
-        "likedBy":[],
-
+        "caloriesPerServ":
+            recipeMap["totalCalories"] / recipeMap["peopleServed"],
+        "updatedOn": createdOn,
+        "numLikes": 0,
+        "likedBy": [],
       });
       DocumentReference ref = await recipes.add(recipeMap);
-      await FirebaseFirestore.instance.collection('Users').doc(creatorsId).update(
-          {
-            "numCreated" :FieldValue.increment(1)
-          });
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(creatorsId)
+          .update({"numCreated": FieldValue.increment(1)});
 
-      await FirebaseFirestore.instance.collection('Aggregate').doc('Stats').collection('Recipes').doc('stats').update({
-        "count" : FieldValue.increment(1)
-      });
-      await _addToCreations(ref.id,creatorsId);
+      await FirebaseFirestore.instance
+          .collection('Aggregate')
+          .doc('Stats')
+          .collection('Recipes')
+          .doc('stats')
+          .update({"count": FieldValue.increment(1)});
+      await _addToCreations(ref.id, creatorsId);
       for (String id in recipeMap["neededEquipment"]) {
         await updateEquipmentCounter(id);
       }
@@ -165,21 +179,26 @@ class FirebaseDB {
       return ref.id;
     }
     return null;
-
   }
 
-  static Future<String> insertMealPlan( MealPlan mealPlan,) async{
-    if(AppUser.instance.isUserSignedIn()){
-      DocumentReference ref = await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).collection("MealPlans").add(mealPlan.toJson());
+  static Future<String> insertMealPlan(
+    MealPlan mealPlan,
+  ) async {
+    if (AppUser.instance.isUserSignedIn()) {
+      DocumentReference ref = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .collection("MealPlans")
+          .add(mealPlan.toJson());
       return ref.id;
     }
     return null;
-
   }
+
   static Future<DocumentSnapshot> insertEquipment(Equipment equip) async {
-    if(AppUser.instance.isUserSignedIn()){
+    if (AppUser.instance.isUserSignedIn()) {
       CollectionReference equipment =
-      FirebaseFirestore.instance.collection('Equipment');
+          FirebaseFirestore.instance.collection('Equipment');
       Map<String, dynamic> equipMap = equip.toJson();
       String imagePath = await _uploadImage(equipMap["equipmentImage"]);
 
@@ -187,54 +206,68 @@ class FirebaseDB {
       DocumentReference ref = await equipment.add({
         "equipmentName": equipMap["equipmentName"].toString().toLowerCase(),
         "equipmentImage": imagePath,
-        "PossibleNames": Conversion.tokenizeByWordChar(equipMap["equipmentName"]),
+        "PossibleNames":
+            Conversion.tokenizeByWordChar(equipMap["equipmentName"]),
         "createdOn": createdOn,
         "usedIn": 0,
         "createdBy": AppUser.instance.uuid
       });
-      await FirebaseFirestore.instance.collection('Aggregate').doc('Stats').collection('Equipment').doc('stats').update({
-        "count" : FieldValue.increment(1)
-      });
+      await FirebaseFirestore.instance
+          .collection('Aggregate')
+          .doc('Stats')
+          .collection('Equipment')
+          .doc('stats')
+          .update({"count": FieldValue.increment(1)});
       return ref.get();
     }
     return null;
-
   }
 
-  static Future<String> updateUserProfile({String username,File profileImage,String aboutMe,
-  String businessUrl, String youtubeUrl, String tiktokUrl}) async {
+  static Future<String> updateUserProfile(
+      {String username,
+      File profileImage,
+      String aboutMe,
+      String businessUrl,
+      String youtubeUrl,
+      String tiktokUrl}) async {
     String imagePath = AppUser.instance.profileImagePath;
 
-    if(profileImage != null){
-      if(imagePath == null || imagePath.length == 0)
-       imagePath = await _uploadImage(profileImage, );
+    if (profileImage != null) {
+      if (imagePath == null || imagePath.length == 0)
+        imagePath = await _uploadImage(
+          profileImage,
+        );
       else
-        imagePath = await _uploadImage(profileImage,path: imagePath );
+        imagePath = await _uploadImage(profileImage, path: imagePath);
     }
-   await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).update({
-     "userName": username,
-     "aboutUser" :aboutMe,
-     "profileImage" : imagePath,
-     "businessUrl" : businessUrl,
-     "youtubeUrl" : youtubeUrl,
-     "tiktokUrl" : tiktokUrl
-   });
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(AppUser.instance.uuid)
+        .update({
+      "userName": username,
+      "aboutUser": aboutMe,
+      "profileImage": imagePath,
+      "businessUrl": businessUrl,
+      "youtubeUrl": youtubeUrl,
+      "tiktokUrl": tiktokUrl
+    });
     return imagePath;
-
   }
+
   static Future<void> updateRecipe(
       {Recipe updatedRecipe,
-        List<String> newEquipmentIds,
-        List<String> newIngredientIds}) async {
+      List<String> newEquipmentIds,
+      List<String> newIngredientIds}) async {
     Map<String, dynamic> recipeMap = updatedRecipe.toJSON();
     recipeMap.addAll({
-      "PossibleNames" : Conversion.tokenizeByPermutations(recipeMap["recipeName"]),
-      "updatedOn" : DateTime.now().millisecondsSinceEpoch,
-      "caloriesPerServ" : recipeMap["totalCalories"] / recipeMap["peopleServed"]
+      "PossibleNames":
+          Conversion.tokenizeByPermutations(recipeMap["recipeName"]),
+      "updatedOn": DateTime.now().millisecondsSinceEpoch,
+      "caloriesPerServ": recipeMap["totalCalories"] / recipeMap["peopleServed"]
     });
     if (recipeMap["recipeImage"] != null) {
-
-      String imagePath = await _uploadImage(recipeMap["recipeImage"], path: updatedRecipe.recipeImageFromDB);
+      String imagePath = await _uploadImage(recipeMap["recipeImage"],
+          path: updatedRecipe.recipeImageFromDB);
       recipeMap.addAll({
         "RecipeImage": imagePath,
       });
@@ -247,41 +280,40 @@ class FirebaseDB {
         .doc(updatedRecipe.id)
         .update(recipeMap);
 
-    if(newEquipmentIds != null){
+    if (newEquipmentIds != null) {
       for (String id in newEquipmentIds) {
         await updateEquipmentCounter(id);
       }
     }
-    if(newIngredientIds != null){
+    if (newIngredientIds != null) {
       for (String id in newIngredientIds) {
         await (updateIngredientCounter(id));
       }
     }
-
-
   }
 
-  static Future<void> updateShoppingList( ShoppingList shoppingList) async{
-    if(AppUser.instance.isUserSignedIn()){
-        Map<String,dynamic> data =shoppingList.toJSON();
-        data.addAll({
-          "updatedOn" : DateTime.now().millisecondsSinceEpoch
-        });
-        await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).collection("UserLists").doc('Groceries').set(data);
-
+  static Future<void> updateShoppingList(ShoppingList shoppingList) async {
+    if (AppUser.instance.isUserSignedIn()) {
+      Map<String, dynamic> data = shoppingList.toJSON();
+      data.addAll({"updatedOn": DateTime.now().millisecondsSinceEpoch});
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .collection("UserLists")
+          .doc('Groceries')
+          .set(data);
     }
-
   }
-  static Future<void> updateUserTaskList( TaskList task) async{
-    if(AppUser.instance.isUserSignedIn()) {
+
+  static Future<void> updateUserTaskList(TaskList task) async {
+    if (AppUser.instance.isUserSignedIn()) {
       Map<String, dynamic> data = task.toJSON();
-      data.addAll({
-        "updatedOn": DateTime
-            .now()
-            .millisecondsSinceEpoch
-      });
-      await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid)
-          .collection("UserLists").doc('Tasks')
+      data.addAll({"updatedOn": DateTime.now().millisecondsSinceEpoch});
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .collection("UserLists")
+          .doc('Tasks')
           .set(data);
     }
   }
@@ -293,11 +325,13 @@ class FirebaseDB {
         .doc(ingredientId)
         .update({"usedIn": FieldValue.increment(1)});
   }
+
   static Future<void> updateRecipeCounter(String recipeId) async {
     CollectionReference recipes =
         FirebaseFirestore.instance.collection('Recipes');
     await recipes.doc(recipeId).update({"usedIn": FieldValue.increment(1)});
   }
+
   static Future<void> updateEquipmentCounter(String equipmentId) async {
     CollectionReference equipment =
         FirebaseFirestore.instance.collection('Equipment');
@@ -305,10 +339,11 @@ class FirebaseDB {
         .doc(equipmentId)
         .update({"usedIn": FieldValue.increment(1)});
   }
+
   static Future<void> updateRecipeFlags(String recipeId, int flag) async {
-    if(AppUser.instance.isUserSignedIn()){
+    if (AppUser.instance.isUserSignedIn()) {
       CollectionReference recipes =
-      FirebaseFirestore.instance.collection('Recipes');
+          FirebaseFirestore.instance.collection('Recipes');
       if (flag == 1)
         await recipes
             .doc(recipeId)
@@ -325,84 +360,127 @@ class FirebaseDB {
         await recipes
             .doc(recipeId)
             .update({"invalidRecipe_Flag": FieldValue.increment(1)});
-      await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).update({
-        "reportedRecipesIds" : FieldValue.arrayUnion([recipeId])
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .update({
+        "reportedRecipesIds": FieldValue.arrayUnion([recipeId])
       });
     }
-
   }
 
-  static Future<DocumentSnapshot> fetchAppStats() async{
-    return await FirebaseFirestore.instance.collection("Aggregate").doc('Stats').collection('App').doc('Stats').get();
+  static Future<QuerySnapshot> fetchUserByStartsWith(String searchKey,
+      {int limit = 8, DocumentSnapshot lastDoc}) {
+    Query q = FirebaseFirestore.instance
+        .collection('Users')
+        .orderBy('userName')
+        .where('userName', isGreaterThanOrEqualTo: searchKey)
+        .where('userName', isLessThanOrEqualTo: searchKey + '\uF8FF')
+        .limit(limit);
+
+    if (lastDoc != null) {
+      q = q.startAfterDocument(lastDoc);
+    }
+    return q.get();
   }
-  static Future<DocumentSnapshot> fetchUserById(String userId) async{
-     return await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+
+  static Future<DocumentSnapshot> fetchAppStats() async {
+    return await FirebaseFirestore.instance
+        .collection("Aggregate")
+        .doc('Stats')
+        .collection('App')
+        .doc('Stats')
+        .get();
   }
-  static Future<QuerySnapshot> fetchRecipesByOwner(String creatorId, {int limit = 5,DocumentSnapshot lastDoc})async{
-    Query q =  FirebaseFirestore.instance.collection("Recipes")
+
+  static Future<DocumentSnapshot> fetchUserById(String userId) async {
+    return await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userId)
+        .get();
+  }
+
+  static Future<QuerySnapshot> fetchRecipesByOwner(String creatorId,
+      {int limit = 5, DocumentSnapshot lastDoc}) async {
+    Query q = FirebaseFirestore.instance
+        .collection("Recipes")
         .where("createdBy", isEqualTo: creatorId)
-        .orderBy("createdOn",descending: true);
+        .orderBy("createdOn", descending: true);
 
-    if(lastDoc != null){
+    if (lastDoc != null) {
       q = q.startAfterDocument(lastDoc);
     }
     return await q.limit(limit).get();
   }
-  static Future<QuerySnapshot> fetchRecipesByLiked(String likerId, {int limit = 5,DocumentSnapshot lastDoc})async{
-    Query q =  FirebaseFirestore.instance.collection("Recipes")
+
+  static Future<QuerySnapshot> fetchRecipesByLiked(String likerId,
+      {int limit = 5, DocumentSnapshot lastDoc}) async {
+    Query q = FirebaseFirestore.instance
+        .collection("Recipes")
         .where("likedBy", arrayContains: likerId)
-        .orderBy("createdOn",descending: true);
+        .orderBy("createdOn", descending: true);
 
-    if(lastDoc != null){
+    if (lastDoc != null) {
       q = q.startAfterDocument(lastDoc);
     }
     return await q.limit(limit).get();
   }
 
-  static Future<QuerySnapshot> fetchRecipesByTitle(String title, double calories, {int limit = 5,DocumentSnapshot lastDoc})async{
-    Query q =  FirebaseFirestore.instance.collection("Recipes")
+  static Future<QuerySnapshot> fetchRecipesByTitle(
+      String title, double calories,
+      {int limit = 5, DocumentSnapshot lastDoc}) async {
+    Query q = FirebaseFirestore.instance
+        .collection("Recipes")
         .where("PossibleNames", arrayContains: title)
-        .where("caloriesPerServ", isLessThanOrEqualTo:  calories)
+        .where("caloriesPerServ", isLessThanOrEqualTo: calories)
         .orderBy("caloriesPerServ")
-        .orderBy("createdOn",descending: true);
+        .orderBy("createdOn", descending: true);
 
-    if(lastDoc != null){
+    if (lastDoc != null) {
       q = q.startAfterDocument(lastDoc);
     }
     return await q.limit(limit).get();
   }
-  static Future<QuerySnapshot> fetchRecipesByCuisine(String cuisine, double calories, {int limit = 5,DocumentSnapshot lastDoc})async{
-    Query q =  FirebaseFirestore.instance.collection("Recipes")
+
+  static Future<QuerySnapshot> fetchRecipesByCuisine(
+      String cuisine, double calories,
+      {int limit = 5, DocumentSnapshot lastDoc}) async {
+    Query q = FirebaseFirestore.instance
+        .collection("Recipes")
         .where("mealTimes", arrayContains: cuisine)
-        .where("caloriesPerServ", isLessThanOrEqualTo:  calories)
+        .where("caloriesPerServ", isLessThanOrEqualTo: calories)
         .orderBy("caloriesPerServ")
-        .orderBy("createdOn",descending: true);
-    if(lastDoc != null){
+        .orderBy("createdOn", descending: true);
+    if (lastDoc != null) {
       q = q.startAfterDocument(lastDoc);
     }
     return await q.limit(limit).get();
   }
 
-  static Future<QuerySnapshot> fetchRecipeByDiet(String diet, double calories, {int limit = 5,DocumentSnapshot lastDoc})async{
-    Query q =  FirebaseFirestore.instance.collection("Recipes")
+  static Future<QuerySnapshot> fetchRecipeByDiet(String diet, double calories,
+      {int limit = 5, DocumentSnapshot lastDoc}) async {
+    Query q = FirebaseFirestore.instance
+        .collection("Recipes")
         .where("diets", arrayContains: diet)
-        .where("caloriesPerServ", isLessThanOrEqualTo:  calories)
+        .where("caloriesPerServ", isLessThanOrEqualTo: calories)
         .orderBy("caloriesPerServ")
-        .orderBy("createdOn",descending: true);
-    if(lastDoc != null){
-      q = q.startAfterDocument(lastDoc);
-    }
-    return await q.limit(limit).get();
-  }
-  static Future<QuerySnapshot> fetchRecipesByNew( {int limit = 5,DocumentSnapshot lastDoc})async{
-    Query q =  FirebaseFirestore.instance.collection("Recipes")
-        .orderBy("createdOn",descending: true);
-    if(lastDoc != null){
+        .orderBy("createdOn", descending: true);
+    if (lastDoc != null) {
       q = q.startAfterDocument(lastDoc);
     }
     return await q.limit(limit).get();
   }
 
+  static Future<QuerySnapshot> fetchRecipesByNew(
+      {int limit = 5, DocumentSnapshot lastDoc}) async {
+    Query q = FirebaseFirestore.instance
+        .collection("Recipes")
+        .orderBy("createdOn", descending: true);
+    if (lastDoc != null) {
+      q = q.startAfterDocument(lastDoc);
+    }
+    return await q.limit(limit).get();
+  }
 
   static Future<DocumentSnapshot> fetchRecipeById(String reference) async {
     CollectionReference recipes =
@@ -418,17 +496,15 @@ class FirebaseDB {
     return await ref.get();
   }
 
-  static Future<QuerySnapshot> fetchIngredientByContains({
-    String possibleName,
-    DocumentSnapshot documentSnapshot,
-    int limit
-  })async{
+  static Future<QuerySnapshot> fetchIngredientByContains(
+      {String possibleName,
+      DocumentSnapshot documentSnapshot,
+      int limit}) async {
     String searchTerm = possibleName.toLowerCase();
     CollectionReference ingredients =
-    FirebaseFirestore.instance.collection('Ingredients');
+        FirebaseFirestore.instance.collection('Ingredients');
     Query query = ingredients
-        .where('PossibleNames',
-        arrayContains: searchTerm)
+        .where('PossibleNames', arrayContains: searchTerm)
         .orderBy("IngredientName", descending: false)
         .orderBy("usedIn", descending: true);
 
@@ -438,25 +514,47 @@ class FirebaseDB {
     return await query.limit(limit).get();
   }
 
-
-  static Future<QuerySnapshot<Map<String, dynamic>>>fetchMealPlans({int numDaysBack = 7}) async{
-    if(AppUser.instance.isUserSignedIn()){
+  static Future<QuerySnapshot<Map<String, dynamic>>> fetchMealPlans(
+      {int numDaysBack = 7}) async {
+    if (AppUser.instance.isUserSignedIn()) {
       DateTime nowDate = DateTime.now();
-      int startDate = DateTime(nowDate.year,nowDate.month,nowDate.day).subtract(Duration(days: numDaysBack)).millisecondsSinceEpoch;
-      return   await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).collection("MealPlans").where("dateMillis",isGreaterThanOrEqualTo:startDate ).get();
+      int startDate = DateTime(nowDate.year, nowDate.month, nowDate.day)
+          .subtract(Duration(days: numDaysBack))
+          .millisecondsSinceEpoch;
+      return await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .collection("MealPlans")
+          .where("dateMillis", isGreaterThanOrEqualTo: startDate)
+          .get();
     }
     return null;
   }
-  static Future<DocumentSnapshot<Map<String, dynamic>>>fetchUserTaskList() async{
-    if(AppUser.instance.isUserSignedIn())
-    return await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).collection("UserLists").doc('Tasks').get();
+
+  static Future<DocumentSnapshot<Map<String, dynamic>>>
+      fetchUserTaskList() async {
+    if (AppUser.instance.isUserSignedIn())
+      return await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .collection("UserLists")
+          .doc('Tasks')
+          .get();
     return null;
   }
-  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchUserShoppingList({String creatorsId}) async{
-    if(AppUser.instance.isUserSignedIn())
-    return await FirebaseFirestore.instance.collection('Users').doc(creatorsId).collection("UserLists").doc('Groceries').get();
-  return null;
+
+  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchUserShoppingList(
+      {String creatorsId}) async {
+    if (AppUser.instance.isUserSignedIn())
+      return await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(creatorsId)
+          .collection("UserLists")
+          .doc('Groceries')
+          .get();
+    return null;
   }
+
   static Future<DocumentSnapshot> fetchEquipmentById(String reference) async {
     CollectionReference equipment =
         FirebaseFirestore.instance.collection('Equipment');
@@ -464,18 +562,15 @@ class FirebaseDB {
     return await ref.get();
   }
 
-
-  static Future<QuerySnapshot> fetchEquipmentByContains({
-    String possibleName,
-    DocumentSnapshot documentSnapshot,
-    int limit
-  })async{
+  static Future<QuerySnapshot> fetchEquipmentByContains(
+      {String possibleName,
+      DocumentSnapshot documentSnapshot,
+      int limit}) async {
     String searchTerm = possibleName.toLowerCase();
     CollectionReference ingredients =
-    FirebaseFirestore.instance.collection('Equipment');
+        FirebaseFirestore.instance.collection('Equipment');
     Query query = ingredients
-        .where('PossibleNames',
-        arrayContains: searchTerm)
+        .where('PossibleNames', arrayContains: searchTerm)
         .orderBy("equipmentName", descending: false)
         .orderBy("usedIn", descending: true);
 
@@ -485,12 +580,15 @@ class FirebaseDB {
     return await query.limit(limit).get();
   }
 
-  static Future<void> deleteMealPlan(String mealPlanId)async{
-    if(AppUser.instance.isUserSignedIn())
-    await FirebaseFirestore.instance.collection('Users').doc(AppUser.instance.uuid).collection("MealPlans").doc(mealPlanId).delete();
-
+  static Future<void> deleteMealPlan(String mealPlanId) async {
+    if (AppUser.instance.isUserSignedIn())
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(AppUser.instance.uuid)
+          .collection("MealPlans")
+          .doc(mealPlanId)
+          .delete();
   }
-
 
   static Future<String> _uploadImage(File _image, {String path}) async {
     /*
@@ -500,15 +598,13 @@ class FirebaseDB {
     * */
 
     Reference ref;
-    if(path == null)
-     ref = FirebaseStorage.instance
-        .ref()
-        .child(basename(_image.path) + DateTime.now().toString());
-    else{
-      String bucket = path.split('/').last;
+    if (path == null)
       ref = FirebaseStorage.instance
           .ref()
-          .child(bucket);
+          .child(basename(_image.path) + DateTime.now().toString());
+    else {
+      String bucket = path.split('/').last;
+      ref = FirebaseStorage.instance.ref().child(bucket);
     }
 
     Uint8List imageData = await _testCompressFile(_image);
@@ -517,7 +613,6 @@ class FirebaseDB {
     return snapshot.ref.getDownloadURL();
   }
 
-
   static Future<Uint8List> _testCompressFile(File file) async {
     return await FlutterImageCompress.compressWithFile(
       file.absolute.path,
@@ -525,37 +620,27 @@ class FirebaseDB {
       minHeight: 256,
       quality: 94,
     );
-
   }
 
-
-
-  static Future<void> updateAll()async {
-    QuerySnapshot appUsers =  await FirebaseFirestore.instance.collection('Users').get();
-    for(var record in appUsers.docs){
-      await FirebaseFirestore.instance.collection('Users').doc(record.id).update({
-        "followedBy" : 0,
-        "numCreated": 0,
-        "numLiked" : 0
-      });
+  static Future<void> updateAll() async {
+    QuerySnapshot appUsers =
+        await FirebaseFirestore.instance.collection('Users').get();
+    for (var record in appUsers.docs) {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(record.id)
+          .update({"followedBy": 0, "numCreated": 0, "numLiked": 0});
     }
 
-    QuerySnapshot q =  await FirebaseFirestore.instance.collection("Recipes").get();
-    for(var record in q.docs){
+    QuerySnapshot q =
+        await FirebaseFirestore.instance.collection("Recipes").get();
+    for (var record in q.docs) {
       String owner = record.get("createdBy");
 
-      await FirebaseFirestore.instance.collection('Users').doc(owner).update({
-        "numCreated" : FieldValue.increment(1)
-      });
-
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(owner)
+          .update({"numCreated": FieldValue.increment(1)});
     }
-
-
   }
-
-
-
-
-
-
 }

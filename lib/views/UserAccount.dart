@@ -18,6 +18,7 @@ import '../constants/messages/en_messages.dart';
 import '../models/AppUser.dart';
 import '../notifiers/UserNotifier.dart';
 import '../services/conversion.dart';
+import '../services/toast.dart';
 import 'creationMenus/builders/Profilebuilder.dart';
 
 class UserAccount extends StatefulWidget {
@@ -157,11 +158,17 @@ class _UserAccountState extends State<UserAccount>
                       width: MediaQuery.of(context).size.width,
                       alignment: AlignmentDirectional.center,
                       padding: EdgeInsets.only(top: 15, bottom: 10),
-                      child: Text(
+                      child: SelectableText(
                         '@' + AppUser.instance.userName,
                         style: TextStyle(
                             color: color_palette["white"], fontSize: 28.h),
+                        onTap: (){
+                          Clipboard.setData(ClipboardData(text: AppUser.instance.userName)).then((_){
+                            CustomToast("Username has been copied to clipboard.");
+                          });
+                        },
                       ),
+
                     ),
                     Container(
                       height: 48.h,
