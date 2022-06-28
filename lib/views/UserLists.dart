@@ -91,7 +91,7 @@ class _UserListState extends State<UserList> {
                             ),
                             Container(
                                 width: MediaQuery.of(context).size.width,
-                                height: 130.h,
+                                height: 125.h + 10,
                                 margin: EdgeInsets.only(bottom: 10),
                                 alignment: AlignmentDirectional.centerStart,
                                 child: NotificationListener<
@@ -106,7 +106,7 @@ class _UserListState extends State<UserList> {
                                     shrinkWrap: true,
                                     children: [
                                       listOption(
-                                          height: 120.h,
+                                          height: 120.h ,
                                           primaryLabel: "Tasks",
                                           secondaryLabel: userListNotifier.taskList == null ? "0 of 0 Done":
                                               "${userListNotifier.taskList.hasCompleted.where((e) => e == true).length} of ${userListNotifier.taskList.subtasks.length} Done",
@@ -117,7 +117,7 @@ class _UserListState extends State<UserList> {
                                             });
                                           }),
                                       listOption(
-                                          height: 120.h,
+                                          height: 120.h ,
                                           primaryLabel: "Groceries",
                                           secondaryLabel: "${userListNotifier.groceryList.shoppingItems.length} Items",
                                           bgColor: color_palette["overlay"],
@@ -174,7 +174,7 @@ class _UserListState extends State<UserList> {
           if (onTap != null) onTap();
         },
         child: Container(
-          height: height,
+          height: height  ,
           margin: EdgeInsets.only(top: 5, right: 15),
           padding: EdgeInsets.fromLTRB(10, 18, 10, 5),
           decoration: BoxDecoration(
@@ -193,8 +193,9 @@ class _UserListState extends State<UserList> {
               ),
               Text(
                 primaryLabel,
+                maxLines: 1,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 36.h, color: Colors.white),
+                style: TextStyle(fontSize: 35.h, color: Colors.white),
               )
             ],
           ),

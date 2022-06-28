@@ -185,7 +185,7 @@ class _OverlaySearchState extends State<OverlaySearch> {
                                       color: Colors.grey[600], fontSize: 15.9.h),
                                 ),
                                 Container(
-                                  height: 116.6.h,
+                                  height: 116.6.h + 10,
                                   alignment: AlignmentDirectional.center,
                                   child: searchMode == MenuType.INGREDIENTS
                                       ? ingredientNotifier.ingredientState ==
@@ -263,7 +263,7 @@ class _OverlaySearchState extends State<OverlaySearch> {
                                       color: Colors.grey[600], fontSize: 15.9.h),
                                 ),
                                 Container(
-                                  height: 116.6.h,
+                                  height: 116.6.h + 10,
                                   child: ListView(
 
                                     scrollDirection: Axis.horizontal,

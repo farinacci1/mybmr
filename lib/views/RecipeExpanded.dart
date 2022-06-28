@@ -262,7 +262,7 @@ class _RecipeExpandedState extends State<RecipeExpanded> {
                           ),
                           Container(
                             width: MediaQuery.of(context).size.width - 28.0,
-                            height: 104.h,
+                            height: 102.h + 10,
                             margin: EdgeInsets.symmetric(
                                 vertical: 2, horizontal: 14),
                             alignment: AlignmentDirectional.center,

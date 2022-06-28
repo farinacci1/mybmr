@@ -82,8 +82,9 @@ class _ProfileViewerState extends State<ProfileViewer>
             )
           ],
           bottom: PreferredSize(
-              preferredSize: Size.fromHeight(325.h),
-              child: Container(
+              preferredSize: Size.fromHeight( 125.w + 68.h + 90 ),
+
+            child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -132,7 +133,7 @@ class _ProfileViewerState extends State<ProfileViewer>
                       ),
                     ),
                     Container(
-                      height: 48.h,
+                      height: 125.w * 1.2 + 5,
                       width: MediaQuery.of(context).size.width,
                       padding: EdgeInsets.symmetric(horizontal: 15),
                       margin: EdgeInsets.only(bottom: 2),

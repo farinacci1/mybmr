@@ -94,7 +94,7 @@ class _MealPlannerDisplayState extends State<MealPlannerDisplay> {
                               width: MediaQuery.of(context).size.width,
                               padding: EdgeInsets.only(top: 10),
                               child: CalendarTimeline(
-                                height: 92.75.h,
+                                height: 93.h + 10,
                                 showYears: true,
                                 initialDate: Provider.of<MealPlanNotifier>(
                                         context,

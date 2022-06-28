@@ -68,11 +68,12 @@ class _UserAccountState extends State<UserAccount>
           ),
           toolbarHeight: 0.0,
           bottom: PreferredSize(
-              preferredSize: Size.fromHeight(325.h),
+              preferredSize: Size.fromHeight( 125.w + 68.h + 155 ),
               child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.fromLTRB(10, 10, 10, 30),
@@ -154,6 +155,7 @@ class _UserAccountState extends State<UserAccount>
                                               fontSize: 17.225.h),
                                         )
                                       ])),
+
                     Container(
                       width: MediaQuery.of(context).size.width,
                       alignment: AlignmentDirectional.center,
@@ -171,7 +173,7 @@ class _UserAccountState extends State<UserAccount>
 
                     ),
                     Container(
-                      height: 48.h,
+                      height: 125.w * 1.2 + 5,
                       width: MediaQuery.of(context).size.width,
                       padding: EdgeInsets.symmetric(horizontal: 15),
                       margin: EdgeInsets.only(bottom: 2),

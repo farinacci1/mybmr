@@ -137,7 +137,7 @@ class _MealSharePopupState extends State<MealSharePopup> {
                 ),
 
                 Container(
-                  height: 100.h,
+                  height: 100.h + 15,
                   margin: EdgeInsets.only(top: 15),
                   child: CalendarList(
                     dateRange: Conversion.getDaysInBetween(
