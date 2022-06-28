@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mybmr/notifiers/LookupUserNotifier.dart';
+import 'package:mybmr/services/Firebase_db.dart';
 
 import 'package:mybmr/services/helper.dart';
 import 'package:mybmr/services/toast.dart';
@@ -14,7 +16,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/Themes.dart';
-import '../constants/messages/en_messages.dart';
 import '../models/AppUser.dart';
 
 import '../services/conversion.dart';
@@ -72,12 +73,29 @@ class _ProfileViewerState extends State<ProfileViewer>
           ),
           actions: [
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                if(AppUser.instance.isUserSignedIn()){
+                  if(AppUser.instance.following.contains(widget.appUser.uuid)){
+                    FirebaseDB.followUser(AppUser.instance.uuid, widget.appUser.uuid).then((_) {
+                      setState(() {
+                        AppUser.instance.addFollow(widget.appUser.uuid);
+                      });
+                    });
+                  }else{
+                    FirebaseDB.unfollowUser(AppUser.instance.uuid, widget.appUser.uuid).then((_) {
+                      setState(() {
+                        AppUser.instance.unFollow(widget.appUser.uuid);
+                      });
+                    });
+                  }
+                }
+              },
               child: Container(
                   padding: EdgeInsets.only(right: 15),
                   child: Icon(
-                    AntDesign.addusergroup,
+                    AntDesign.book,
                     size: 38.h,
+                    color: AppUser.instance.following.contains(widget.appUser.uuid) ? Colors.tealAccent : color_palette["white"],
                   )),
             )
           ],

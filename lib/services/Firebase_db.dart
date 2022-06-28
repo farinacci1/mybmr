@@ -96,6 +96,18 @@ class FirebaseDB {
           .update({"numLiked": FieldValue.increment(-1)});
     }
   }
+  static Future<void> followUser(String followersId,String userId) async {
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(followersId)
+        .update({"following": FieldValue.arrayUnion([userId])});
+  }
+  static Future<void> unfollowUser(String followersId,String userId) async {
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(followersId)
+        .update({"following": FieldValue.arrayRemove([userId])});
+  }
 
   static Future<DocumentSnapshot> insertIngredient(
     Ingredient ingredient,
@@ -253,6 +265,7 @@ class FirebaseDB {
     });
     return imagePath;
   }
+
 
   static Future<void> updateRecipe(
       {Recipe updatedRecipe,

@@ -14,6 +14,7 @@ class AppUser{
   int numFollowedBy;
   int numFollowing;
   List<String> likedRecipes = [];
+  List<String> following = [];
   String _businessUrl = "";
   String _youtubeUrl = "";
   String _tiktokUrl = "";
@@ -96,11 +97,20 @@ class AppUser{
     if(likedRecipes.contains(recipeId)) likedRecipes.remove(recipeId);
   }
 
+  void addFollow(String followId){
+   following.add(followId);
+
+  }
+  void unFollow(String followId){
+    following.remove(followId);
+  }
+
 
 
   void insertReportedRecipe(String recipeId){
     if(!_reportedRecipesIds.contains(recipeId)) _reportedRecipesIds.add(recipeId);
   }
+
   bool isUserSignedIn(){
     return  this.uuid != null && this.uuid != "";
   }
