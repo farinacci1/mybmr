@@ -37,13 +37,10 @@ class _UserListState extends State<UserList> {
     ));
     UserListNotifier userListNotifier = Provider.of<UserListNotifier>(context, listen: true);
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(children: [

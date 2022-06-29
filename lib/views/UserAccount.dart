@@ -52,13 +52,10 @@ class _UserAccountState extends State<UserAccount>
     Provider.of<FavoritesNotifier>(context, listen: true);
     Provider.of<UserNotifier>(context,listen: true);
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
     return Scaffold(
         backgroundColor: color_palette["white"],
         appBar: AppBar(
@@ -68,7 +65,7 @@ class _UserAccountState extends State<UserAccount>
           ),
           toolbarHeight: 0.0,
           bottom: PreferredSize(
-              preferredSize: Size.fromHeight( 125.w + 68.h + 165 ),
+              preferredSize: Size.fromHeight( 150.w +153.h + 112),
               child: Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

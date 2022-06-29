@@ -108,13 +108,10 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
     Provider.of<EquipmentNotifier>(context, listen: true);
     Provider.of<IngredientNotifier>(context, listen: true);
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
     return WillPopScope(
         onWillPop: () async {
           clearRecipe();
@@ -949,13 +946,10 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
 
       builder: (ctx) {
         ScreenUtil.init(
-            BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width,
-                maxHeight: MediaQuery.of(context).size.height),
-            designSize: Size(2400, 1080),
-            context: ctx,
-            minTextAdapt: true,
-            orientation: Orientation.portrait);
+          ctx,
+          designSize: Size(2400, 1080),
+          minTextAdapt: true,
+        );
         return MultiSelectBottomSheet(
           items: DietTypes.map((e) => MultiSelectItem(e, e)).toList(),
           unselectedColor:  lighten( Colors.lightBlueAccent,0.1),
@@ -1004,13 +998,10 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
       ),
       builder: (ctx) {
         ScreenUtil.init(
-            BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width,
-                maxHeight: MediaQuery.of(context).size.height),
-            designSize: Size(2400, 1080),
-            context: ctx,
-            minTextAdapt: true,
-            orientation: Orientation.portrait);
+          ctx,
+          designSize: Size(2400, 1080),
+          minTextAdapt: true,
+        );
         return MultiSelectBottomSheet(
           items: MEALTYPES.map((e) => MultiSelectItem(e, e)).toList(),
           unselectedColor:  lighten( Colors.lightBlueAccent,0.1),

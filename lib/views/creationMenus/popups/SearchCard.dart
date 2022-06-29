@@ -48,13 +48,10 @@ class _SearchCardState extends State<SearchCard>
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
 
     return Center(
       child: Hero(

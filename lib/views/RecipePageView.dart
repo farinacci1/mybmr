@@ -21,6 +21,7 @@ import 'package:mybmr/services/hero_dialog_route.dart';
 import 'package:mybmr/services/toast.dart';
 
 import 'package:mybmr/widgets/AnimatedLikeScreen.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -72,13 +73,10 @@ class _RecipePageViewState extends State<RecipePageView> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
     changeUiOverlayStyle(
       statusBarColor: color_palette["white"],
       systemNavigationBarColor: color_palette["background_color"],
@@ -238,13 +236,10 @@ class _RecipePageViewState extends State<RecipePageView> {
                         Key key = Key(getCurrentRecipe(index).id);
                         itemKeys.add(key);
                         ScreenUtil.init(
-                            BoxConstraints(
-                                maxWidth: MediaQuery.of(ctx).size.width,
-                                maxHeight: MediaQuery.of(ctx).size.height),
-                            designSize: Size(2400, 1080),
-                            context: ctx,
-                            minTextAdapt: true,
-                            orientation: Orientation.portrait);
+                          ctx,
+                          designSize: Size(2400, 1080),
+                          minTextAdapt: true,
+                        );
                         return VisibilityDetector(
                             key: key,
                             onVisibilityChanged: (VisibilityInfo info) {
@@ -286,7 +281,8 @@ class _RecipePageViewState extends State<RecipePageView> {
       ]);
     else
       return Center(
-        child: Text("No Recipes Found", style: TextStyle(fontSize: 28.h),),
+        child:
+        isLoading() ? JumpingDotsProgressIndicator(fontSize: 28.h): Text("No Recipes Found", style: TextStyle(fontSize: 28.h),),
       );
   }
 
@@ -596,6 +592,20 @@ class _RecipePageViewState extends State<RecipePageView> {
     else return null;
   }
 
+  bool isLoading(){
+
+    if(widget.mode == 0)
+      return Provider.of<RecipeNotifier>(context, listen: false).isFetching;
+    if(widget.mode == 1)
+      return Provider.of<FavoritesNotifier>(context, listen: false).currentlyFetchingMyRecipes;
+    if(widget.mode == 2)
+      return Provider.of<FavoritesNotifier>(context, listen: false).currentlyFetchingFavorites;
+    if(widget.mode == 3)
+      return Provider.of<LookupUserNotifier>(context, listen: false).currentlyFetchingMyRecipes;
+    if(widget.mode == 4)
+      return Provider.of<LookupUserNotifier>(context, listen: false).currentlyFetchingFavorites;
+    return false;
+  }
   Widget headerBar(Recipe recipe) {
     return Container(
         padding: EdgeInsets.fromLTRB(10, 5, 10, 15),

@@ -115,13 +115,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     Provider.of<RecipeNotifier>(context, listen: true);
 
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
     return Scaffold(
       resizeToAvoidBottomInset: false,
 

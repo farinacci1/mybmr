@@ -34,13 +34,10 @@ class _MealPlannerDisplayState extends State<MealPlannerDisplay> {
     List<MealPlan> dailyPlans = mealPlanNotifier.filterByDate(date);
 
     ScreenUtil.init(
-        BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
-        designSize: Size(2400, 1080),
-        context: context,
-        minTextAdapt: true,
-        orientation: Orientation.portrait);
+      context,
+      designSize: Size(2400, 1080),
+      minTextAdapt: true,
+    );
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: color_palette["background_color"],
         systemNavigationBarColor: color_palette["background_color"],

@@ -23,6 +23,7 @@ class AppUser{
   AppUser.fromJSON(Map<String,dynamic> data){
     this._userName = data["userName"] ?? this._uuid;
     this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
+    this.following = data["following"] != null ? List.from(data["following"]) : [];
     this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
     this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
     this._profileImagePath = data["profileImage"] ?? "";
@@ -36,6 +37,7 @@ class AppUser{
   void fromJSON(Map<String,dynamic> data){
     this._userName = data["userName"] ?? this._uuid;
     this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
+    this.following = data["following"] != null ? List.from(data["following"]) : [];
     this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
     this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
     this._profileImagePath = data["profileImage"] ?? "";
@@ -76,6 +78,7 @@ class AppUser{
 
     _reportedRecipesIds.clear();
     likedRecipes.clear();
+    following.clear();
     _userName = "";
     _businessUrl = "";
     _tiktokUrl = "";
