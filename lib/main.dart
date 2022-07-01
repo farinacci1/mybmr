@@ -84,6 +84,7 @@ class MyApp extends StatelessWidget {
               await Firebase.initializeApp();
 
               MobileAds.instance.initialize();
+
               bool isSupportedAppVersion = await AppManager.isValidAppVersion();
               if (isSupportedAppVersion)
                 return Home();

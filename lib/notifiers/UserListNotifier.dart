@@ -26,19 +26,19 @@ class UserListNotifier extends ChangeNotifier {
     _taskList =  TaskList(subtasks: [],hasCompleted: []);
 
   }
-  void removeFromTaskList(int idx){
+  Future<void> removeFromTaskList(int idx) async {
     if(AppUser.instance.isUserSignedIn()){
     _taskList.subtasks.removeAt(idx);
     _taskList.hasCompleted.removeAt(idx);
-    FirebaseDB.updateUserTaskList(_taskList);
+    await FirebaseDB.updateUserTaskList(_taskList);
     notifyListeners();
     }
   }
-  void addTaskToList(String task){
+  Future<void> addTaskToList(String task) async {
     if(AppUser.instance.isUserSignedIn()) {
       _taskList.subtasks.add(task);
       _taskList.hasCompleted.add(false);
-      FirebaseDB.updateUserTaskList(_taskList);
+      await FirebaseDB.updateUserTaskList(_taskList);
       notifyListeners();
     }
   }
@@ -69,10 +69,10 @@ class UserListNotifier extends ChangeNotifier {
   void fetchUserList(){
     isCurrentlyFetching = true;
     FirebaseDB.fetchUserShoppingList().then((DocumentSnapshot record){
-      if(record != null) _groceryList = ShoppingList.fromJSON(record.data());
+      if(record.exists) _groceryList = ShoppingList.fromJSON(record.data());
     }).whenComplete(() {
       FirebaseDB.fetchUserTaskList().then((DocumentSnapshot record) {
-        if(record != null)_taskList = TaskList.fromJSON(record.data());
+        if(record.exists)_taskList = TaskList.fromJSON(record.data());
       }).whenComplete((){
         isCurrentlyFetching = false;
         notifyListeners();

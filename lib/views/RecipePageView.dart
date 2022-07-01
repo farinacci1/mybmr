@@ -741,7 +741,11 @@ class _RecipePageViewState extends State<RecipePageView> {
               SystemUiOverlayStyle(statusBarColor: color_palette["white"]));
         });
       },
-      child: buildImage(recipe.recipeImageFromDB),
+      child: buildImage(recipe.recipeImageFromDB,
+        wrapperWidth: MediaQuery.of(context).size.width,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.width * 1.333
+      ),
     );
   }
 

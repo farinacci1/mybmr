@@ -72,7 +72,7 @@ class _ProfileViewerState extends State<ProfileViewer>
             GestureDetector(
               onTap: () {
                 if(AppUser.instance.isUserSignedIn()){
-                  if(AppUser.instance.following.contains(widget.appUser.uuid)){
+                  if(!AppUser.instance.following.contains(widget.appUser.uuid)){
                     FirebaseDB.followUser(AppUser.instance.uuid, widget.appUser.uuid).then((_) {
                       setState(() {
                         AppUser.instance.addFollow(widget.appUser.uuid);
@@ -297,7 +297,7 @@ class _ProfileViewerState extends State<ProfileViewer>
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "Following\n${Conversion.nFormatter(widget.appUser.numFollowing ?? 0, 1)}",
+                            "Following\n${Conversion.nFormatter(widget.appUser.following.length ?? 0, 1)}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 26.h,

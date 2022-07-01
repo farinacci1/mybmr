@@ -12,7 +12,6 @@ class AppUser{
   int numCreated;
   int numLiked;
   int numFollowedBy;
-  int numFollowing;
   List<String> likedRecipes = [];
   List<String> following = [];
   String _businessUrl = "";
@@ -86,7 +85,7 @@ class AppUser{
      numCreated = 0;
      numLiked = 0;
      numFollowedBy = 0;
-     numFollowing = 0;
+
 
   }
    bool hasWebLinks(){

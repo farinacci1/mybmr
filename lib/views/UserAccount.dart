@@ -319,7 +319,7 @@ class _UserAccountState extends State<UserAccount>
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "Following\n${Conversion.nFormatter(AppUser.instance.numFollowing ?? 0, 1)}",
+                            "Following\n${Conversion.nFormatter(AppUser.instance.following.length ?? 0, 1)}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 26.h,

@@ -101,12 +101,20 @@ class FirebaseDB {
         .collection('Users')
         .doc(followersId)
         .update({"following": FieldValue.arrayUnion([userId])});
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userId)
+        .update({"followedBy": FieldValue.increment(1) });
   }
   static Future<void> unfollowUser(String followersId,String userId) async {
     await FirebaseFirestore.instance
         .collection('Users')
         .doc(followersId)
         .update({"following": FieldValue.arrayRemove([userId])});
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userId)
+        .update({"followedBy": FieldValue.increment(-1) });
   }
 
   static Future<DocumentSnapshot> insertIngredient(
@@ -556,12 +564,11 @@ class FirebaseDB {
     return null;
   }
 
-  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchUserShoppingList(
-      {String creatorsId}) async {
+  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchUserShoppingList() async {
     if (AppUser.instance.isUserSignedIn())
       return await FirebaseFirestore.instance
           .collection('Users')
-          .doc(creatorsId)
+          .doc(AppUser.instance.uuid)
           .collection("UserLists")
           .doc('Groceries')
           .get();
@@ -635,25 +642,5 @@ class FirebaseDB {
     );
   }
 
-  static Future<void> updateAll() async {
-    QuerySnapshot appUsers =
-        await FirebaseFirestore.instance.collection('Users').get();
-    for (var record in appUsers.docs) {
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(record.id)
-          .update({"followedBy": 0, "numCreated": 0, "numLiked": 0});
-    }
 
-    QuerySnapshot q =
-        await FirebaseFirestore.instance.collection("Recipes").get();
-    for (var record in q.docs) {
-      String owner = record.get("createdBy");
-
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(owner)
-          .update({"numCreated": FieldValue.increment(1)});
-    }
-  }
 }

@@ -296,7 +296,7 @@ class _UserListState extends State<UserList> {
                                 userListNotifier.addTaskToList(out["value"]);
                               }
                             },
-                            child: Text("Add Task"),
+                            child: Text("Add Task",style: TextStyle(fontSize: 26.h),),
                             style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15)),

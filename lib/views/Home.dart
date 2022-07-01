@@ -20,6 +20,7 @@ import 'package:mybmr/views/creationMenus/builders/RecipeBuilder.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/Themes.dart';
+import '../services/toast.dart';
 import '../widgets/Flashy_tab_bar.dart';
 import 'UserAccount.dart';
 
@@ -52,14 +53,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         return RecipeBuilder();
       case 3:
         if (AppUser.instance.isUserSignedIn()) {
+
           if (Provider.of<UserListNotifier>(context, listen: false)
                       .isCurrentlyFetching ==
-                  false &&
+                  false
+              &&
               Provider.of<UserListNotifier>(context, listen: false)
-                      .groceryList ==
-                  null &&
-              Provider.of<UserListNotifier>(context, listen: false).taskList ==
-                  null)
+                      .groceryList.shoppingItems.length == 0
+              &&
+              Provider.of<UserListNotifier>(context, listen: false).taskList.subtasks.length ==0)
             Provider.of<UserListNotifier>(context, listen: false)
                 .fetchUserList();
         }
