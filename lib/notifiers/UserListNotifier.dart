@@ -16,8 +16,6 @@ class UserListNotifier extends ChangeNotifier {
   ShoppingList _groceryList =ShoppingList([], []);
   TaskList _taskList = TaskList(subtasks: [],hasCompleted: []);
 
-  bool isGroceryDirty = false;
-  bool isTaskDirty = false;
 
   ShoppingList get groceryList => _groceryList;
 
@@ -29,32 +27,43 @@ class UserListNotifier extends ChangeNotifier {
 
   }
   void removeFromTaskList(int idx){
+    if(AppUser.instance.isUserSignedIn()){
     _taskList.subtasks.removeAt(idx);
     _taskList.hasCompleted.removeAt(idx);
-    isTaskDirty = true;
+    FirebaseDB.updateUserTaskList(_taskList);
     notifyListeners();
+    }
   }
   void addTaskToList(String task){
-
-    _taskList.subtasks.add(task);
-    _taskList.hasCompleted.add(false);
-    isTaskDirty = true;
-    notifyListeners();
+    if(AppUser.instance.isUserSignedIn()) {
+      _taskList.subtasks.add(task);
+      _taskList.hasCompleted.add(false);
+      FirebaseDB.updateUserTaskList(_taskList);
+      notifyListeners();
+    }
   }
   void changeTaskState(int idx){
-    _taskList.hasCompleted[idx] = !_taskList.hasCompleted[idx];
-    isTaskDirty = true;
-    notifyListeners();
+    if(AppUser.instance.isUserSignedIn()) {
+      _taskList.hasCompleted[idx] = !_taskList.hasCompleted[idx];
+      FirebaseDB.updateUserTaskList(_taskList);
+      notifyListeners();
+    }
   }
   void removeGroceryItem(int idx){
-    _groceryList.shoppingItems.removeAt(idx);
-    isGroceryDirty = true;
-    notifyListeners();
+    if(AppUser.instance.isUserSignedIn()){
+      _groceryList.shoppingItems.removeAt(idx);
+      FirebaseDB.updateShoppingList(_groceryList);
+      notifyListeners();
+    }
+
   }
   void addGroceryItem(ShoppingItem shoppingItem){
-    _groceryList.shoppingItems.add(shoppingItem);
-    isGroceryDirty = true;
-    notifyListeners();
+    if(AppUser.instance.isUserSignedIn()){
+      _groceryList.shoppingItems.add(shoppingItem);
+      FirebaseDB.updateShoppingList(_groceryList);
+      notifyListeners();
+    }
+
   }
 
   void fetchUserList(){
@@ -70,19 +79,6 @@ class UserListNotifier extends ChangeNotifier {
       } );
     });
 
-  }
-
-  
-  void updateLists(ShoppingList shoppingList){
-
-      if(isGroceryDirty){
-        isGroceryDirty = false;
-        FirebaseDB.updateShoppingList(_groceryList);
-      }
-      if(isTaskDirty){
-        isTaskDirty = false;
-        FirebaseDB.updateUserTaskList(_taskList);
-      }
   }
 
 
