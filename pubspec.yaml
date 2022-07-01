@@ -3,7 +3,7 @@ description: "You're Go To Budget, Meal Plan and Recipe Application"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 
-version: 1.0.6+43
+version: 1.0.7+44
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
