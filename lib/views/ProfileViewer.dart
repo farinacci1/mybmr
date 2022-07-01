@@ -76,12 +76,14 @@ class _ProfileViewerState extends State<ProfileViewer>
                     FirebaseDB.followUser(AppUser.instance.uuid, widget.appUser.uuid).then((_) {
                       setState(() {
                         AppUser.instance.addFollow(widget.appUser.uuid);
+                        widget.appUser.numFollowedBy += 1;
                       });
                     });
                   }else{
                     FirebaseDB.unfollowUser(AppUser.instance.uuid, widget.appUser.uuid).then((_) {
                       setState(() {
                         AppUser.instance.unFollow(widget.appUser.uuid);
+                        widget.appUser.numFollowedBy -= 1;
                       });
                     });
                   }

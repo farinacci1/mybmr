@@ -24,6 +24,7 @@ class AppUser{
     this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
     this.following = data["following"] != null ? List.from(data["following"]) : [];
     this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
+    this.numFollowedBy = data["followedBy"] ?? 0;
     this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
     this._profileImagePath = data["profileImage"] ?? "";
     this.numCreated = data["numCreated"] ?? 0;
@@ -37,6 +38,7 @@ class AppUser{
     this._userName = data["userName"] ?? this._uuid;
     this._reportedRecipesIds =  List.from(data["reportedRecipesIds"]);
     this.following = data["following"] != null ? List.from(data["following"]) : [];
+    this.numFollowedBy = data["followedBy"] ?? 0;
     this._reportedRecipesIds = this._reportedRecipesIds.toSet().toList();
     this._aboutUser = data["aboutUser"] ?? "Chef Enthusiast";
     this._profileImagePath = data["profileImage"] ?? "";
