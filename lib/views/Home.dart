@@ -16,7 +16,6 @@ import 'package:mybmr/views/MealPlannerDisplay.dart';
 import 'package:mybmr/views/RecipePageView.dart';
 import 'package:mybmr/views/UserLists.dart';
 import 'package:mybmr/views/creationMenus/builders/RecipeBuilder.dart';
-import 'package:mybmr/widgets/BottomMenu.dart';
 
 import 'package:provider/provider.dart';
 
@@ -31,7 +30,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   int activeView = 0;
-  bool createRecipeRequested = false;
+
 
   Widget getPage(BuildContext context) {
     switch (activeView) {
@@ -42,7 +41,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         MealPlanNotifier mealPlanNotifier =
             Provider.of<MealPlanNotifier>(context, listen: false);
 
-        if ( AppUser.instance.isUserSignedIn()) {
+        if (AppUser.instance.isUserSignedIn()) {
           if (mealPlanNotifier.mealPlans.length == 0 &&
               mealPlanNotifier.isFetching == false)
             mealPlanNotifier.getMealPlansFromDB();
@@ -50,26 +49,30 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         return MealPlannerDisplay();
       case 2:
-
         return RecipeBuilder();
       case 3:
-        if ( AppUser.instance.isUserSignedIn()) {
-
+        if (AppUser.instance.isUserSignedIn()) {
           if (Provider.of<UserListNotifier>(context, listen: false)
                       .isCurrentlyFetching ==
                   false &&
               Provider.of<UserListNotifier>(context, listen: false)
-                      .groceryList == null &&  Provider.of<UserListNotifier>(context, listen: false).taskList == null)
-            Provider.of<UserListNotifier>(context, listen: false).fetchUserList();
+                      .groceryList ==
+                  null &&
+              Provider.of<UserListNotifier>(context, listen: false).taskList ==
+                  null)
+            Provider.of<UserListNotifier>(context, listen: false)
+                .fetchUserList();
         }
         return UserList();
       case 4:
-        if ( !AppUser.instance.isUserSignedIn()) {
+        if (!AppUser.instance.isUserSignedIn()) {
           return LoginScreen();
         } else {
-          Provider.of<RecipeNotifier>(context,listen: false).recipes.forEach((rec) {
-            if(rec.likedBy.contains(AppUser.instance.uuid))
-            AppUser.instance.addLikeRecipe(rec.id);
+          Provider.of<RecipeNotifier>(context, listen: false)
+              .recipes
+              .forEach((rec) {
+            if (rec.likedBy.contains(AppUser.instance.uuid))
+              AppUser.instance.addLikeRecipe(rec.id);
           });
 
           FavoritesNotifier favoritesNotifier =
@@ -121,15 +124,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     );
     return Scaffold(
       resizeToAvoidBottomInset: false,
-
-      appBar:    AppBar(
+      appBar: AppBar(
         toolbarHeight: 0,
-
-        backgroundColor:   this.activeView == 0 ? color_palette["white"] :color_palette["background_color"] ,
+        backgroundColor: this.activeView == 0
+            ? color_palette["white"]
+            : color_palette["background_color"],
         elevation: 0.0,
         actionsIconTheme: IconThemeData(opacity: 0.0),
-        systemOverlayStyle:   SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-
+        systemOverlayStyle:
+            SystemUiOverlayStyle(statusBarColor: Colors.transparent),
         flexibleSpace: FlexibleSpaceBar(
           stretchModes: [StretchMode.fadeTitle],
         ),
@@ -138,39 +141,110 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         animationCurve: Curves.linear,
         selectedIndex: activeView,
         iconSize: 30.h,
-        height: min(max(80.h,55),100),
+        height: min(max(80.h, 55), 100),
         showElevation: true,
-        backgroundColor:color_palette["background_color"],
-        onItemSelected: (index) => setState(() {
+        backgroundColor: color_palette["background_color"],
+        onItemSelected: (index)  async {
           if (index != 2) {
-            createRecipeRequested = false;
-            this.activeView = index;
-          } else if (this.activeView != 4 || AppUser.instance.isUserSignedIn())
-            createRecipeRequested = true;
-        }),
+            setState(() {
+              this.activeView = index;
+            });
+
+          } else if (this.activeView != 4 ||
+              AppUser.instance.isUserSignedIn()) {
+             await showModalBottomSheet(
+                context: context,
+                elevation: 6.0,
+                backgroundColor: Colors.transparent,
+                barrierColor: Colors.transparent,
+                 isScrollControlled: true,
+                 shape: RoundedRectangleBorder(
+                   borderRadius: BorderRadius.vertical(
+                     top: Radius.circular(40),
+                   ),
+                 ),
+
+                 builder: (BuildContext context) {
+                        return Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 15),
+                            decoration: BoxDecoration(
+                              color: color_palette["background_color"],
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black,
+                                    blurRadius: 2,
+                                    spreadRadius: 2),
+                              ],
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(40)),
+                            ),
+                            child: SingleChildScrollView(
+
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: MediaQuery.of(context).size.width - 20,
+                                    margin: EdgeInsets.symmetric(horizontal: 15),
+                                    alignment: AlignmentDirectional.center,
+                                    padding: EdgeInsets.only(bottom: 8),
+                                    child: Text(
+                                      "Create",
+                                      style:
+                                      TextStyle(color: color_palette["white"], fontSize: 32.h),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => RecipeBuilder()));
+
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      alignment: AlignmentDirectional.center,
+                                      padding: EdgeInsets.symmetric(vertical: 10),
+                                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                      decoration: BoxDecoration(
+                                          color: color_palette["alternative"],
+                                          borderRadius: BorderRadius.circular(8)),
+                                      child: Text("Share Recipe",
+                                          style: TextStyle(
+                                              color: color_palette["white"], fontSize: 22.h)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ));
+
+                });
+          }
+        },
         items: [
           FlashyTabBarItem(
             activeColor: color_palette["white"],
-            inactiveColor:color_palette["white"],
+            inactiveColor: color_palette["white"],
             icon: Icon(AntDesign.home),
             title: Text(
               'Discover',
             ),
           ),
           FlashyTabBarItem(
-            activeColor:color_palette["white"],
+            activeColor: color_palette["white"],
             inactiveColor: color_palette["white"],
             icon: Icon(AntDesign.calendar),
             title: Text('Meal Plans'),
           ),
           FlashyTabBarItem(
-            activeColor:color_palette["white"],
-            inactiveColor:color_palette["white"],
+            activeColor: color_palette["white"],
+            inactiveColor: color_palette["white"],
             icon: Icon(AntDesign.pluscircleo),
             title: Text('Create'),
           ),
           FlashyTabBarItem(
-            activeColor:color_palette["white"],
+            activeColor: color_palette["white"],
             inactiveColor: color_palette["white"],
             icon: Icon(MaterialIcons.filter_list),
             title: Text('Lists'),
@@ -184,68 +258,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ],
       ),
       body: Container(
-          child: Stack(
-        alignment: AlignmentDirectional.bottomCenter,
-        children: [
-          getPage(context),
-          BottomMenu(
-            isHidden: !createRecipeRequested,
-            backgroundColor: color_palette["background_color"],
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width - 20,
-                margin: EdgeInsets.symmetric(horizontal: 15),
-                alignment: AlignmentDirectional.center,
-                padding: EdgeInsets.only(bottom: 8),
-
-                child: Text(
-                  "Create",
-                  style:
-                      TextStyle(color: color_palette["white"], fontSize: 32.h),
-                ),
-              ),
-              Expanded(
-                  child: Container(
-                      child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-
-                  GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  RecipeBuilder()));
-                      setState(() {
-                        createRecipeRequested = false;
-                      });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      alignment: AlignmentDirectional.center,
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      decoration: BoxDecoration(
-                          color: color_palette["alternative"],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text("Share Recipe",
-                          style: TextStyle(
-                              color: color_palette["white"], fontSize: 22.h)),
-                    ),
-                  ),
-
-                ],
-              ))),
-            ],
-            onClose: () {
-              setState(() {
-                createRecipeRequested = false;
-              });
-            },
-          )
-        ],
-      )),
+          child:   getPage(context))
     );
   }
 }

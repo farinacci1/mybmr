@@ -407,13 +407,27 @@ class _UserListState extends State<UserList> {
           resetIllusion();
           Provider.of<SearchNotifier>(context, listen: false).searchMode =
               MenuType.INGREDIENTS;
-          Map<String, dynamic> data = await Navigator.of(context)
-              .push(HeroDialogRoute(builder: (context) {
-            return OverlaySearch(
-              title: "Ingredient",
-              inShopping: true,
-            );
-          }));
+
+          Map<String, dynamic> data = await showModalBottomSheet(
+              context: context,
+              elevation: 6.0,
+              backgroundColor: Colors.transparent,
+              barrierColor: Colors.transparent,
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(79.5.h),
+                ),
+              ),
+
+              builder: (BuildContext context) {
+                return Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                child:OverlaySearch(
+                  title: "Ingredient",
+                  inShopping: true,
+                ));
+              });
 
           if (data != null && data.containsKey("ingredient")) {
             Ingredient ingredient = data["ingredient"];
@@ -460,10 +474,29 @@ class _UserListState extends State<UserList> {
           Provider.of<SearchNotifier>(context, listen: false).searchMode =
               MenuType.EQUIPMENT;
 
-          Map<String, dynamic> data = await Navigator.of(context)
-              .push(HeroDialogRoute(builder: (context) {
-            return OverlaySearch(title: "Equipment", inShopping: true);
-          }));
+          Map<String, dynamic> data = await showModalBottomSheet(
+              context: context,
+              elevation: 6.0,
+              backgroundColor: Colors.transparent,
+              barrierColor: Colors.transparent,
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(79.5.h),
+                ),
+              ),
+
+              builder: (BuildContext context) {
+                return Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child:OverlaySearch(
+                        title: "Equipment",
+                        inShopping: true
+                    ));
+              });
+
+
+
           if (data != null && data.containsKey("equipment")) {
             Equipment equipmentItem = data["equipment"];
             ShoppingItem shoppingItem = userListNotifier.groceryList.shoppingItems.firstWhere((item) {

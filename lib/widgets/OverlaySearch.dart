@@ -66,29 +66,12 @@ class _OverlaySearchState extends State<OverlaySearch> {
       minTextAdapt: true,
     );
     return Container(
-        width: MediaQuery.of(context).size.height,
-        height: MediaQuery.of(context).size.width,
         color: Colors.transparent,
         child: Material(
           color: Colors.transparent,
-          child: Stack(
-            alignment: AlignmentDirectional.bottomCenter,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  this.clearContent();
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: double.infinity,
-                  color: Colors.transparent,
-                ),
-              ),
-              Container(
+            child: Container(
 
                 width: MediaQuery.of(context).size.width,
-                margin: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
                 decoration: BoxDecoration(
                     color: Color(0XFFF5F5F5),
                     borderRadius:
@@ -350,8 +333,7 @@ class _OverlaySearchState extends State<OverlaySearch> {
                   ],
                 )),
               )
-            ],
-          ),
+
         ));
   }
 

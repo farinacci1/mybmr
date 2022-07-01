@@ -28,7 +28,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../constants/Themes.dart';
 import '../services/helper.dart';
-import '../widgets/BottomMenu.dart';
+
 import 'ProfileViewer.dart';
 import 'RecipeExpanded.dart';
 import 'creationMenus/builders/RecipeBuilder.dart';
@@ -47,7 +47,7 @@ class RecipePageView extends StatefulWidget {
 class _RecipePageViewState extends State<RecipePageView> {
   bool isHeartAnimating = false;
   bool isHeartAnimating2 = false;
-  bool openBottomMenu = false;
+
   Recipe activeRecipe;
 
   List<Key> itemKeys = [];
@@ -106,111 +106,7 @@ class _RecipePageViewState extends State<RecipePageView> {
                 return true;
               },
               child: recipeFeed()),
-          BottomMenu(
-            isHidden: !openBottomMenu,
-            backgroundColor: color_palette["background_color"],
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width - 20,
-                margin: EdgeInsets.symmetric(horizontal: 15),
-                alignment: AlignmentDirectional.center,
-                padding: EdgeInsets.only(bottom: 8),
-                child: Text(
-                  "Options",
-                  style:
-                      TextStyle(color: color_palette["white"], fontSize: 32.h),
-                ),
-              ),
-              Expanded(
-                  child: Container(
-                      child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if(AppUser.instance.isUserSignedIn() &&
-                      activeRecipe != null
-                      && widget.mode == 1
-                      && activeRecipe.createdBy == AppUser.instance.uuid)
-                    GestureDetector(
-                    onTap: () async {
-                      Map<String,dynamic> response =await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  RecipeBuilder(recipe: activeRecipe)));
 
-                      setState(() {
-                        openBottomMenu = false;
-                      });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      alignment: AlignmentDirectional.center,
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      decoration: BoxDecoration(
-                          color: color_palette["alternative"],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text("Edit Recipe",
-                          style: TextStyle(
-                              color: color_palette["white"], fontSize: 22.h)),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      Map<String, dynamic> response = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RecipeBuilder(
-                                    recipe: activeRecipe,
-                                    shouldClone: true,
-                                  )));
-                      setState(() {
-                        openBottomMenu = false;
-                      });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      alignment: AlignmentDirectional.center,
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      decoration: BoxDecoration(
-                          color: color_palette["alternative"],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text("Build From",
-                          style: TextStyle(
-                              color: color_palette["white"], fontSize: 22.h)),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      showReportPopup(activeRecipe);
-
-                      setState(() {
-                        openBottomMenu = false;
-                      });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      alignment: AlignmentDirectional.center,
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      decoration: BoxDecoration(
-                          color: color_palette["alternative"],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text("Report",
-                          style: TextStyle(
-                              color: color_palette["white"], fontSize: 22.h)),
-                    ),
-                  ),
-                ],
-              ))),
-            ],
-            onClose: () {
-              setState(() {
-                openBottomMenu = false;
-              });
-            },
-          )
         ]));
   }
 
@@ -693,10 +589,121 @@ class _RecipePageViewState extends State<RecipePageView> {
             Spacer(),
             GestureDetector(
                 onTap: () async {
-                  setState(() {
+
                     activeRecipe = recipe;
-                    openBottomMenu = true;
-                  });
+
+                    showModalBottomSheet(
+                        context: context,
+                         backgroundColor: Colors.transparent,
+                         barrierColor: Colors.transparent,
+
+                         builder: (BuildContext context) {
+                           return Container(
+                             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                             decoration: BoxDecoration(
+                               color:  color_palette["background_color"],
+                               boxShadow: [
+                                 BoxShadow(
+                                     color: Colors.black,
+                                     blurRadius: 2,
+                                     spreadRadius: 2
+
+                                 ),
+                               ],
+                               borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                             ),
+                             child:SingleChildScrollView(
+
+                                 child:  Column(
+                                   mainAxisAlignment: MainAxisAlignment.center,
+                                   children: [
+                                     Container(
+                                       width: MediaQuery.of(context).size.width - 20,
+                                       margin: EdgeInsets.symmetric(horizontal: 15),
+                                       alignment: AlignmentDirectional.center,
+                                       padding: EdgeInsets.only(bottom: 8),
+                                       child: Text(
+                                         "Options",
+                                         style:
+                                         TextStyle(color: color_palette["white"], fontSize: 32.h),
+                                       ),
+                                     ),
+                                     if(AppUser.instance.isUserSignedIn() &&
+                                         activeRecipe != null
+                                         && widget.mode == 1
+                                         && activeRecipe.createdBy == AppUser.instance.uuid)
+                                       GestureDetector(
+                                         onTap: () async {
+                                           Map<String,dynamic> response =await Navigator.push(
+                                               context,
+                                               MaterialPageRoute(
+                                                   builder: (context) =>
+                                                       RecipeBuilder(recipe: activeRecipe)));
+
+                                         },
+                                         child: Container(
+                                           width: double.infinity,
+                                           alignment: AlignmentDirectional.center,
+                                           padding: EdgeInsets.symmetric(vertical: 10),
+                                           margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                           decoration: BoxDecoration(
+                                               color: color_palette["alternative"],
+                                               borderRadius: BorderRadius.circular(8)),
+                                           child: Text("Edit Recipe",
+                                               style: TextStyle(
+                                                   color: color_palette["white"], fontSize: 22.h)),
+                                         ),
+                                       ),
+                                     GestureDetector(
+                                       onTap: () async {
+                                         Map<String, dynamic> response = await Navigator.push(
+                                             context,
+                                             MaterialPageRoute(
+                                                 builder: (context) => RecipeBuilder(
+                                                   recipe: activeRecipe,
+                                                   shouldClone: true,
+                                                 )));
+                                         Navigator.pop(context);
+                                       },
+                                       child: Container(
+                                         width: double.infinity,
+                                         alignment: AlignmentDirectional.center,
+                                         padding: EdgeInsets.symmetric(vertical: 10),
+                                         margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                         decoration: BoxDecoration(
+                                             color: color_palette["alternative"],
+                                             borderRadius: BorderRadius.circular(8)),
+                                         child: Text("Build From",
+                                             style: TextStyle(
+                                                 color: color_palette["white"], fontSize: 22.h)),
+                                       ),
+                                     ),
+                                     GestureDetector(
+                                       onTap: () async {
+                                         await showReportPopup(activeRecipe);
+
+
+                                       },
+                                       child: Container(
+                                         width: double.infinity,
+                                         alignment: AlignmentDirectional.center,
+                                         padding: EdgeInsets.symmetric(vertical: 10),
+                                         margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                         decoration: BoxDecoration(
+                                             color: color_palette["alternative"],
+                                             borderRadius: BorderRadius.circular(8)),
+                                         child: Text("Report",
+                                             style: TextStyle(
+                                                 color: color_palette["white"], fontSize: 22.h)),
+                                       ),
+                                     ),
+                                   ],
+                                 )),
+
+
+                           );
+                    },
+                    );
                 },
                 child: Container(
                   width: 30,

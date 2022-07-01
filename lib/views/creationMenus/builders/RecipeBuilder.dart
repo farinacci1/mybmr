@@ -546,12 +546,26 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                         Provider.of<SearchNotifier>(context,
                                                 listen: false)
                                             .searchMode = MenuType.INGREDIENTS;
-                                        await Navigator.of(context).push(
-                                            HeroDialogRoute(builder: (context) {
-                                          return OverlaySearch(
-                                            title: "Ingredient",
-                                          );
-                                        }));
+                                        await showModalBottomSheet(
+                                            context: context,
+                                            elevation: 6.0,
+                                            backgroundColor: Colors.transparent,
+                                            barrierColor: Colors.transparent,
+                                            isScrollControlled: true,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.vertical(
+                                                top: Radius.circular(79.5.h),
+                                              ),
+                                            ),
+
+                                            builder: (BuildContext context) {
+                                              return Padding(
+                                                  padding: MediaQuery.of(context).viewInsets,
+                                                  child:OverlaySearch(
+                                                    title: "Ingredient",
+
+                                                  ));
+                                            });
                                       },
                                     ),
                                     invalidIngredients.length > 0
@@ -580,13 +594,29 @@ class _RecipeBuilderState extends State<RecipeBuilder> {
                                         Provider.of<SearchNotifier>(context,
                                                 listen: false)
                                             .searchMode = MenuType.EQUIPMENT;
-                                        await Navigator.of(context).push(
-                                            HeroDialogRoute(builder: (context) {
-                                          return OverlaySearch(
-                                            title: "Equipment",
-                                          );
-                                        }));
+
+
+                                         await showModalBottomSheet(
+                                            context: context,
+                                            elevation: 6.0,
+                                            backgroundColor: Colors.transparent,
+                                            barrierColor: Colors.transparent,
+                                            isScrollControlled: true,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.vertical(
+                                                top: Radius.circular(79.5.h),
+                                              ),
+                                            ),
+
+                                            builder: (BuildContext context) {
+                                              return Padding(
+                                                  padding: MediaQuery.of(context).viewInsets,
+                                                  child:OverlaySearch(
+                                                      title: "Equipment",
+                                                  ));
+                                            });
                                       },
+
                                     ),
                                     if (Provider.of<EquipmentNotifier>(context,
                                                 listen: false)
